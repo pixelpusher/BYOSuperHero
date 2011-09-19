@@ -1,0 +1,14 @@
+Code from the workshop Build Your Own Superhero by CoDesign and Openlab Workshops
+
+http://wiki.openlabworkshops.org/index.php?title=BYOSuperhero
+
+requires Processing from http://processing.org
+
+and the libraries:
+
+SimpleOpenNI - http://code.google.com/p/simple-openni/
+GLGraphics library for 3D - http://codeanticode.wordpress.com/libraries/
+Toxiclibs - http://toxiclibs.org
+
+
+
