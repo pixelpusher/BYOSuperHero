@@ -86,11 +86,12 @@ void setup()
 
 void draw()
 {
+  
   // update the cam
   context.update();
 
   background(0,0,0);
-  
+  pushMatrix();
   // set the scene pos
   translate(width/2, height/2, 0);
   rotateX(rotX);
@@ -125,9 +126,9 @@ void draw()
  
   // draw the kinect cam
   context.drawCamFrustum();
+ popMatrix();
 
-
-
+  hint(DISABLE_DEPTH_TEST);
   // draw particle systems
   // rotate around center of screen (accounted for in mouseDragged() function)
   pushMatrix();
