@@ -17,6 +17,7 @@ float prev_x, prev_y, prev_z;
 public static final int numPlotSamples = 256;
 float[] mFunction;
 
+float SMOOTHING = 0.2f;
 
 void setup()
 {
@@ -111,15 +112,15 @@ void drawSkeleton(int userId)
 // plots the movement function as a signal on the screen
 void plotMovementFunction()
 {
-  background(0);
+
   int xpixel1,xpixel2;
   
   for (int i = 0;i < (numPlotSamples-1);i++)
   {
      xpixel1 = (int) round((((float) i) / ((float) numPlotSamples))*((float)context.depthWidth()));
      xpixel2 = (int) round((((float) i+1) / ((float) numPlotSamples))*((float)context.depthWidth()));
-     color(0,200,0);
-     line(xpixel1,mFunction[i],xpixel2,mFunction[i+1]); 
+     stroke(255);
+     line(xpixel1,context.depthHeight()-mFunction[i],xpixel2,context.depthHeight()-mFunction[i+1]); 
   }
 }
 
@@ -136,21 +137,50 @@ float jointMovementFunction(int userId,int joint)
   context.getJointPositionSkeleton(userId,joint,jointPos);
   
   // calculate the difference between current and previous position
+  /*
   d_x = abs(jointPos.x - prev_x);
   d_y = abs(jointPos.y - prev_y);
   d_z = abs(jointPos.z - prev_z);    
+  */
+
+  d_x = abs(jointPos.x - prev_x);
+  d_y = abs(jointPos.y - prev_y);
+  d_z = abs(jointPos.z - prev_z);    
+  
   
   // sum x, y and z differences to get overall movement function sample
   diff = d_x + d_y + d_z;
   
   // store current position for next sample point
-  prev_x = jointPos.x;
-  prev_y = jointPos.y;
-  prev_z = jointPos.z;  
+  prev_x = lerp(jointPos.x, prev_x, SMOOTHING);
+  prev_y = lerp(jointPos.y, prev_y, SMOOTHING);
+  prev_z = lerp(jointPos.z, prev_z, SMOOTHING);
+  
+  if (diff > thresh)
+  {
+    // generate swipe events for each limb...
+     onSwipe(int joint); 
+  }
   
   // return movement function sample
   return diff;
 }
+
+
+void keyReleased()
+{
+  switch(keyCode)
+  {
+    case UP: SMOOTHING += 0.05;
+    break;
+    
+    case DOWN: SMOOTHING -= 0.05;
+    break;
+  }
+  SMOOTHING = constrain(SMOOTHING,0.0f, 1.0f);
+  println("SMOOTHING: " + SMOOTHING);
+}
+
 
 // -----------------------------------------------------------------
 // SimpleOpenNI events

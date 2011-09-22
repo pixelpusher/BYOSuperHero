@@ -33,6 +33,7 @@ GLTexture tex;
 
 
 
+PVector handLeft, handRight, phandLeft, phandRight;
 
 
 
@@ -50,6 +51,13 @@ float        rotY = radians(0);
 void setup()
 {  
   size(640, 480, GLConstants.GLGRAPHICS);  
+
+
+  handLeft = new PVector();
+  handRight = new PVector();
+  phandLeft = new PVector();
+  phandRight = new PVector();
+
 
   GL gl;
   PGraphicsOpenGL pgl = (PGraphicsOpenGL) g;  // g may change
@@ -90,6 +98,17 @@ void draw()
   // update the cam
   context.update();
 
+if ( context.isTrackingSkeleton(1) )
+{
+ phandLeft.set(handLeft);
+ context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_LEFT_HAND,handLeft);
+
+phandRight.set(handRight);
+ context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_HAND,handRight);
+}
+
+handMoved();
+
   background(0,0,0);
   pushMatrix();
   // set the scene pos
@@ -105,7 +124,9 @@ void draw()
  
   translate(0,0,-1000);  // set the rotation center of the scene 1000 infront of the camera
 
+
   stroke(100); 
+/*
   for(int y=0;y < context.depthHeight();y+=steps)
   {
     for(int x=0;x < context.depthWidth();x+=steps)
@@ -119,6 +140,7 @@ void draw()
       }
     } 
   } 
+  */
   
   // draw the skeleton if it's available
   if(context.isTrackingSkeleton(1))
@@ -223,7 +245,9 @@ void keyPressed()
     }
 }
 
-void mouseReleased()
+
+
+void newSwarm()
 {
   swarm = new ImageParticleSwarm(this, tex);
   if (swarm.makeModel( triMesh ))
@@ -257,22 +281,22 @@ void mousePressed()
 
 
 
-void mouseDragged()
+void handMoved()
 {
+  
   // get 3D rotated mouse position
-  Vec3D pos=new Vec3D(mouseX-width/2, mouseY-height/2, 0);
+  Vec3D pos=new Vec3D(handRight.x-width/2, handRight.y-height/2, 0);
+  
   pos.rotateX(rotation.x);
   pos.rotateY(rotation.y);
   // use distance to previous point as target stroke weight
   weight+=(sqrt(pos.distanceTo(prev))*2-weight)*0.1;
   // define offset points for the triangle strip
 
-  //println("weight " + weight);
+  println("weight " + weight + " / " + MIN_DIST );
 
-  //if (weight < MIN_DIST && triMeshes.size() > 0)
-  if (true)
+  if (weight > MIN_DIST && triMeshes.size() > 0)
   {
-
     Vec3D a=pos.add(0, 0, weight);
     Vec3D b=pos.add(0, 0, -weight);
 
@@ -283,6 +307,11 @@ void mouseDragged()
     prev=pos;
     p=a;
     q=b;
+  }
+  
+  if (triMeshes.size() > 600)
+  {
+    newSwarm();
   }
 }
 
