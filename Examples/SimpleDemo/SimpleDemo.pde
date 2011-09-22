@@ -43,7 +43,7 @@ import SimpleOpenNI.*;
 SimpleOpenNI context;
 float        zoomF =0.5f;
 float        rotX = radians(180);  // by default rotate the hole scene 180deg around the x-axis, 
-                                   // the data from openni comes upside down
+// the data from openni comes upside down
 float        rotY = radians(0);
 
 
@@ -75,7 +75,7 @@ void setup()
 
 
   context = new SimpleOpenNI(this);
-   
+
   // disable mirror
   context.setMirror(false);
 
@@ -85,70 +85,72 @@ void setup()
   // enable skeleton generation for all joints
   context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);
 
-  stroke(255,255,255);
+  stroke(255, 255, 255);
   smooth();  
-  perspective(95,
-              float(width)/float(height), 
-              10,150000);
+  perspective(95, 
+  float(width)/float(height), 
+  10, 150000);
 }
 
 void draw()
 {
-  
+
   // update the cam
   context.update();
 
-if ( context.isTrackingSkeleton(1) )
-{
- phandLeft.set(handLeft);
- context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_LEFT_HAND,handLeft);
+  if ( context.isTrackingSkeleton(1) )
+  {
+    int userId = 1;
 
-phandRight.set(handRight);
- context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_HAND,handRight);
-}
+    phandLeft.set(handLeft);
+    context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_HAND, handLeft);
 
-handMoved();
+    phandRight.set(handRight);
+    context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_HAND, handRight);
+  }
 
-  background(0,0,0);
+  handMoved();
+
+  background(0, 0, 0);
   pushMatrix();
   // set the scene pos
   translate(width/2, height/2, 0);
   rotateX(rotX);
   rotateY(rotY);
   scale(zoomF);
-  
+
   int[]   depthMap = context.depthMap();
   int     steps   = 3;  // to speed up the drawing, draw every third point
   int     index;
   PVector realWorldPoint;
- 
-  translate(0,0,-1000);  // set the rotation center of the scene 1000 infront of the camera
+
+  translate(0, 0, -1000);  // set the rotation center of the scene 1000 infront of the camera
 
 
   stroke(100); 
-/*
-  for(int y=0;y < context.depthHeight();y+=steps)
+
+  for (int y=0;y < context.depthHeight();y+=steps)
   {
-    for(int x=0;x < context.depthWidth();x+=steps)
+    for (int x=0;x < context.depthWidth();x+=steps)
     {
       index = x + y * context.depthWidth();
-      if(depthMap[index] > 0)
+      if (depthMap[index] > 0)
       { 
         // draw the projected point
         realWorldPoint = context.depthMapRealWorld()[index];
-        point(realWorldPoint.x,realWorldPoint.y,realWorldPoint.z);
+        point(realWorldPoint.x, realWorldPoint.y, realWorldPoint.z);
       }
-    } 
+    }
   } 
-  */
-  
+
+
   // draw the skeleton if it's available
-  if(context.isTrackingSkeleton(1))
+  if (context.isTrackingSkeleton(1))
     drawSkeleton(1);
- 
+
   // draw the kinect cam
   context.drawCamFrustum();
- popMatrix();
+  popMatrix();
 
   hint(DISABLE_DEPTH_TEST);
   // draw particle systems
@@ -283,35 +285,39 @@ void mousePressed()
 
 void handMoved()
 {
-  
-  // get 3D rotated mouse position
-  Vec3D pos=new Vec3D(handRight.x-width/2, handRight.y-height/2, 0);
-  
-  pos.rotateX(rotation.x);
-  pos.rotateY(rotation.y);
-  // use distance to previous point as target stroke weight
-  weight+=(sqrt(pos.distanceTo(prev))*2-weight)*0.1;
-  // define offset points for the triangle strip
 
-  println("weight " + weight + " / " + MIN_DIST );
-
-  if (weight > MIN_DIST && triMeshes.size() > 0)
+  if ( handRight.dist(phandRight) > 1)
   {
-    Vec3D a=pos.add(0, 0, weight);
-    Vec3D b=pos.add(0, 0, -weight);
 
-    // add 2 faces to the mesh
-    triMesh.addFace(p, b, q);
-    triMesh.addFace(p, a, b);
-    // store current points for next iteration
-    prev=pos;
-    p=a;
-    q=b;
-  }
-  
-  if (triMeshes.size() > 600)
-  {
-    newSwarm();
+    // get 3D rotated mouse position
+    Vec3D pos=new Vec3D(handRight.x-width/2, handRight.y-height/2, 0);
+
+    pos.rotateX(rotation.x);
+    pos.rotateY(rotation.y);
+    // use distance to previous point as target stroke weight
+    weight+=(sqrt(pos.distanceTo(prev))*2-weight)*0.1;
+    // define offset points for the triangle strip
+
+    println("weight " + weight + " / " + MIN_DIST );
+
+    if (weight > MIN_DIST)
+    {
+      Vec3D a=pos.add(0, 0, weight);
+      Vec3D b=pos.add(0, 0, -weight);
+
+      // add 2 faces to the mesh
+      triMesh.addFace(p, b, q);
+      triMesh.addFace(p, a, b);
+      // store current points for next iteration
+      prev=pos;
+      p=a;
+      q=b;
+    }
+
+    if (triMesh.getNumVertices() > 600)
+    {
+      newSwarm();
+    }
   }
 }
 
@@ -384,54 +390,53 @@ void drawSkeleton(int userId)
   drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);  
 
   strokeWeight(1);
- 
 }
 
-void drawLimb(int userId,int jointType1,int jointType2)
+void drawLimb(int userId, int jointType1, int jointType2)
 {
   PVector jointPos1 = new PVector();
   PVector jointPos2 = new PVector();
   float  confidence;
-  
-  // draw the joint position
-  confidence = context.getJointPositionSkeleton(userId,jointType1,jointPos1);
-  confidence = context.getJointPositionSkeleton(userId,jointType2,jointPos2);
 
-  stroke(255,0,0,confidence * 200 + 55);
-  line(jointPos1.x,jointPos1.y,jointPos1.z,
-       jointPos2.x,jointPos2.y,jointPos2.z);
-  
-  drawJointOrientation(userId,jointType1,jointPos1,50);
+  // draw the joint position
+  confidence = context.getJointPositionSkeleton(userId, jointType1, jointPos1);
+  confidence = context.getJointPositionSkeleton(userId, jointType2, jointPos2);
+
+  stroke(255, 0, 0, confidence * 200 + 55);
+  line(jointPos1.x, jointPos1.y, jointPos1.z, 
+  jointPos2.x, jointPos2.y, jointPos2.z);
+
+  drawJointOrientation(userId, jointType1, jointPos1, 50);
 }
 
-void drawJointOrientation(int userId,int jointType,PVector pos,float length)
+void drawJointOrientation(int userId, int jointType, PVector pos, float length)
 {
   // draw the joint orientation  
   PMatrix3D  orientation = new PMatrix3D();
-  float confidence = context.getJointOrientationSkeleton(userId,jointType,orientation);
-  if(confidence < 0.001f) 
+  float confidence = context.getJointOrientationSkeleton(userId, jointType, orientation);
+  if (confidence < 0.001f) 
     // nothing to draw, orientation data is useless
     return;
-    
+
   pushMatrix();
-    translate(pos.x,pos.y,pos.z);
-    
-    // set the local coordsys
-    applyMatrix(orientation);
-    
-    // coordsys lines are 100mm long
-    // x - r
-    stroke(255,0,0,confidence * 200 + 55);
-    line(0,0,0,
-         length,0,0);
-    // y - g
-    stroke(0,255,0,confidence * 200 + 55);
-    line(0,0,0,
-         0,length,0);
-    // z - b    
-    stroke(0,0,255,confidence * 200 + 55);
-    line(0,0,0,
-         0,0,length);
+  translate(pos.x, pos.y, pos.z);
+
+  // set the local coordsys
+  applyMatrix(orientation);
+
+  // coordsys lines are 100mm long
+  // x - r
+  stroke(255, 0, 0, confidence * 200 + 55);
+  line(0, 0, 0, 
+  length, 0, 0);
+  // y - g
+  stroke(0, 255, 0, confidence * 200 + 55);
+  line(0, 0, 0, 
+  0, length, 0);
+  // z - b    
+  stroke(0, 0, 255, confidence * 200 + 55);
+  line(0, 0, 0, 
+  0, 0, length);
   popMatrix();
 }
 
@@ -442,8 +447,8 @@ void onNewUser(int userId)
 {
   println("onNewUser - userId: " + userId);
   println("  start pose detection");
-  
-  context.startPoseDetection("Psi",userId);
+
+  context.startPoseDetection("Psi", userId);
 }
 
 void onLostUser(int userId)
@@ -459,31 +464,30 @@ void onStartCalibration(int userId)
 void onEndCalibration(int userId, boolean successfull)
 {
   println("onEndCalibration - userId: " + userId + ", successfull: " + successfull);
-  
+
   if (successfull) 
   { 
     println("  User calibrated !!!");
-    context.startTrackingSkeleton(userId); 
+    context.startTrackingSkeleton(userId);
   } 
   else 
   { 
     println("  Failed to calibrate user !!!");
     println("  Start pose detection");
-    context.startPoseDetection("Psi",userId);
+    context.startPoseDetection("Psi", userId);
   }
 }
 
-void onStartPose(String pose,int userId)
+void onStartPose(String pose, int userId)
 {
   println("onStartdPose - userId: " + userId + ", pose: " + pose);
   println(" stop pose detection");
-  
+
   context.stopPoseDetection(userId); 
   context.requestCalibrationSkeleton(userId, true);
- 
 }
 
-void onEndPose(String pose,int userId)
+void onEndPose(String pose, int userId)
 {
   println("onEndPose - userId: " + userId + ", pose: " + pose);
 }
