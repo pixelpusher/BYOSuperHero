@@ -7,7 +7,7 @@ requires Processing from http://processing.org
 and the libraries:
 
 SimpleOpenNI - http://code.google.com/p/simple-openni/
-GLGraphics library for 3D - http://codeanticode.wordpress.com/libraries/
+GLGraphics library for 3D - http://glgraphics.sourceforge.net/
 Toxiclibs - http://toxiclibs.org
 
 
