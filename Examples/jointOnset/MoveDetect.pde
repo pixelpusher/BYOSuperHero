@@ -9,6 +9,8 @@ class MoveDetect
   float cursample;
   
   int onsetState,swipeStart,swipeEnd;
+  int lastStateChange;
+  int stateChangeInterval = 1000; // in ms
   
   MoveDetect()
   {
@@ -17,6 +19,7 @@ class MoveDetect
      onsetState = 0;
      swipeStart = 0;
      swipeEnd = 0;
+     lastStateChange = 0;
   }
   
   // plots the movement function as a signal on the screen
@@ -64,7 +67,8 @@ class MoveDetect
       // generate swipe events for each limb...
      // onSwipe(joint);
     }
-    else
+    
+    if (diff < 20)
     {
       onsetStateVerify(0); 
     }
@@ -91,35 +95,19 @@ class MoveDetect
      swipeStart = 0;
      swipeEnd = 0;
      
-     if ((onsetState == 0) && (cur_state == 1))
+     if ( (onsetState == 0) && (cur_state == 1) && ((millis()-lastStateChange) > stateChangeInterval) )
      {
+        lastStateChange = millis();
         swipeStart = 1;
         onsetState = 1;
      }
      
-     if ((onsetState == 1) && (cur_state == 0))
+     if ((onsetState == 1) && (cur_state == 0) && ((millis()-lastStateChange) > stateChangeInterval))
      {
+        lastStateChange = millis();
         swipeEnd = 1;
         onsetState = 0;
      }
-  }
-
-
-  void keyReleased()
-  {
-    switch(keyCode)
-    {
-    case UP: 
-      SMOOTHING += 0.05;
-      break;
-
-    case DOWN: 
-      SMOOTHING -= 0.05;
-      break;
-    }
-    
-    SMOOTHING = constrain(SMOOTHING, 0.0f, 1.0f);
-    println("SMOOTHING: " + SMOOTHING);
   }
    
 }

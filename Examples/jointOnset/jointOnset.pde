@@ -1,13 +1,68 @@
+// Swarming points using GLModel and GLCamera, using sprite textures.
+// By Evan Raskob
+
+
 import processing.opengl.*;
+import javax.media.opengl.*;
+import javax.media.opengl.glu.*; 
+import codeanticode.glgraphics.*;
+import toxi.geom.*;
+import toxi.geom.mesh.*;
+import toxi.math.*;
+import java.nio.FloatBuffer;
 import SimpleOpenNI.*;
 
+ImageParticleSwarm swarm;
+ParticleExpander particleExpander;
+
+TriangleMesh triMesh;
+
+ArrayList<Vec3D> handPositions;
+
+Vec3D prev=new Vec3D();
+Vec3D p=new Vec3D();
+Vec3D q=new Vec3D();
+
+Vec2D rotation=new Vec2D();
+
+boolean mouseWasDown = false;
+
+float MIN_DIST = 2.0f;
+float weight=0;
+
+LinkedList<ImageParticleSwarm> swarms;
+GLTexture tex;
+
+
+PVector rightShoulderPos = new PVector();
+PVector leftShoulderPos = new PVector();
+PVector rightHipPos = new PVector();
+PVector leftHipPos = new PVector();
+PVector facePos = new PVector();
+PVector neckPos = new PVector();
+PVector leftHandPos = new PVector();
+PVector rightHandPos = new PVector();
+
+
 SimpleOpenNI  context;
+float        zoomF =0.5f;
+float        rotX = radians(180);  // by default rotate the hole scene 180deg around the x-axis, 
+// the data from openni comes upside down
+float        rotY = radians(0);
 
 MoveDetect md;
 
+PImage marioBody, marioHead, marioArm;
+
+boolean drawLimbs = false;
+boolean drawMovement = false;
+boolean drawBG = true;
+
+
 void setup()
 {
-  size(640, 480, OPENGL);
+
+  size(640, 480, GLConstants.GLGRAPHICS);  
 
   context = new SimpleOpenNI(this);
   md = new MoveDetect();
@@ -18,20 +73,26 @@ void setup()
   // enable skeleton generation for all joints
   context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);
 
-  background(200, 0, 0);
 
-  stroke(0, 0, 255);
-  strokeWeight(3);
-  smooth();
+  GL gl;
+  PGraphicsOpenGL pgl = (PGraphicsOpenGL) g;  // g may change
+  gl = pgl.beginGL();  // always use the GL object returned by beginGL
+  gl.setSwapInterval( 1 ); // use value 0 to disable v-sync 
+  pgl.endGL();
 
-  //  size(context.depthWidth(), context.depthHeight(), OPENGL); 
+  swarms = new LinkedList<ImageParticleSwarm>();
+  particleExpander = new ParticleExpander();
 
-  mFunction = new float[numPlotSamples];
+  triMesh =new TriangleMesh("mesh1");
+
+  handPositions = new ArrayList<Vec3D>();
+
+  // any particle texture... small is better
+  tex = new GLTexture(this, "mario_fireball.png");
 
   marioBody = loadImage("FieryMarioBody.png");
   marioHead = loadImage("FieryMarioHead.png");
-  marioArm = loadImage("FieryMarioArm.png");
-  
+  marioArm = loadImage("FieryMarioLeftArm.png");
 }
 
 void draw()
@@ -39,19 +100,13 @@ void draw()
   // update the cam
   context.update();
 
+
+  hint(DISABLE_DEPTH_TEST);
+
   // draw depthImageMap
   image(context.depthImage(), 0, 0);
 
-  PVector rightShoulderPos = new PVector();
-  PVector leftShoulderPos = new PVector();
-  PVector rightHipPos = new PVector();
-  PVector leftHipPos = new PVector();
-  PVector facePos = new PVector();
-  PVector neckPos = new PVector();
-  PVector leftHandPos = new PVector();
-  PVector rightHandPos = new PVector();
-    
-  hint(DISABLE_DEPTH_TEST);
+
 
   for (int i=1; i<3; i++)
   {
@@ -74,21 +129,21 @@ void draw()
       noStroke();
       beginShape(TRIANGLES);
       texture(marioBody);    
-      vertex(leftShoulderPos.x-80, leftShoulderPos.y-40, 0, 0);
-      vertex(rightShoulderPos.x+80, rightShoulderPos.y-40, 100, 0);
-      vertex(leftHipPos.x-80, leftHipPos.y, 0, 100);
+      vertex(leftShoulderPos.x-40, leftShoulderPos.y-40, 0, 0);
+      vertex(rightShoulderPos.x+40, rightShoulderPos.y-40, 100, 0);
+      vertex(leftHipPos.x-40, leftHipPos.y+40, 0, 100);
 
-      vertex(rightShoulderPos.x+80, rightShoulderPos.y-40, 100, 0);
-      vertex(rightHipPos.x+80, rightHipPos.y+40, 100, 100);
-      vertex(leftHipPos.x-80, leftHipPos.y+40, 0, 100);
+      vertex(rightShoulderPos.x+40, rightShoulderPos.y-40, 100, 0);
+      vertex(rightHipPos.x+40, rightHipPos.y+40, 100, 100);
+      vertex(leftHipPos.x-40, leftHipPos.y+40, 0, 100);
       endShape();
 
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_HEAD, facePos);
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_NECK, neckPos);
-      context.convertRealWorldToProjective(neckPos,neckPos);
-      context.convertRealWorldToProjective(facePos,facePos);
-      
-      
+      context.convertRealWorldToProjective(neckPos, neckPos);
+      context.convertRealWorldToProjective(facePos, facePos);
+
+
       noStroke();
       beginShape(TRIANGLES);
       texture(marioHead);    
@@ -100,19 +155,111 @@ void draw()
       vertex(neckPos.x+80, neckPos.y, 100, 100);
       vertex(neckPos.x-80, neckPos.y, 0, 100);
       endShape();
-      
-      context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_HEAD, rightHandPos);
-      context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_NECK, leftHandPos);
-      context.convertRealWorldToProjective(rightHandPos,rightHandPos);
-      context.convertRealWorldToProjective(leftHandPos,leftHandPos);
-      
+
+      context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_RIGHT_HAND, rightHandPos);
+      context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_LEFT_HAND, leftHandPos);
+      context.convertRealWorldToProjective(rightHandPos, rightHandPos);
+      context.convertRealWorldToProjective(leftHandPos, leftHandPos);
+
       // TODO - draw arms!!!
-            
-      
+
+
       drawSkeleton(i);
     }
   }
+
+
+
+  // draw particle systems
+  // rotate around center of screen (accounted for in mouseDragged() function)
+  pushMatrix();
+  translate(width/2, height/2, 0);
+  rotateX(rotation.x);
+  rotateY(rotation.y);  
+  drawHandPositions();
+  
+
+  // draw mesh as polygon (in white)
+  //drawMesh();
+
+  // draw mesh unique points only (in green)
+  //drawMeshUniqueVerts();
+
+  GLGraphics renderer = (GLGraphics)g;
+
+  renderer.beginGL();  
+  renderer.setDepthMask(false);
+
+  // now models
+
+  int currentTime = millis();
+
+  for (ImageParticleSwarm swarm : swarms)
+  {
+    swarm.update(particleExpander, currentTime);
+    swarm.render();
+  }
+
+  renderer.setDepthMask(true);
+  renderer.endGL();
+  // udpate rotation
+  rotation.addSelf(0.014, 0.0237);
+  popMatrix();
+  
 }
+
+
+void vertex(Vec3D v) {
+  vertex(v.x, v.y, v.z);
+}
+
+
+
+// -----------------------------------------------------------------
+// Keyboard events
+void keyReleased()
+{
+  switch(key)
+  {
+  case 'm':
+    context.setMirror(!context.mirror());
+    break;
+  case ' ':
+    // now models
+    for (ImageParticleSwarm swarm : swarms)
+    {
+      swarm.destroy();
+    }
+    swarms.clear();
+    break;
+  
+  case 's': drawLimbs = !drawLimbs;
+  break;
+  
+  case 'v': drawMovement = !drawMovement;
+  break;
+  
+  case 'b': drawBG = !drawBG;
+  break;
+}
+  
+  
+  
+  switch(keyCode)
+  {
+  case UP: 
+    md.SMOOTHING += 0.05;
+    break;
+
+  case DOWN: 
+    md.SMOOTHING -= 0.05;
+    break;
+  }
+
+  md.SMOOTHING = constrain(md.SMOOTHING, 0.0f, 1.0f);
+  println("SMOOTHING: " + md.SMOOTHING);
+}
+
 
 // draw the skeleton with the selected joints
 void drawSkeleton(int userId)
@@ -139,42 +286,54 @@ void drawSkeleton(int userId)
   stroke(255);
   strokeWeight(2);
 
-  context.drawLimb(userId, SimpleOpenNI.SKEL_HEAD, SimpleOpenNI.SKEL_NECK);
+  if (drawLimbs)
+  {
+    context.drawLimb(userId, SimpleOpenNI.SKEL_HEAD, SimpleOpenNI.SKEL_NECK);
 
-  context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_LEFT_SHOULDER);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, SimpleOpenNI.SKEL_LEFT_HAND);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_LEFT_SHOULDER);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, SimpleOpenNI.SKEL_LEFT_HAND);
 
-  context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_RIGHT_SHOULDER);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_ELBOW);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_RIGHT_SHOULDER);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_ELBOW);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
 
-  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
 
-  context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_LEFT_HIP);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_KNEE, SimpleOpenNI.SKEL_LEFT_FOOT);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_LEFT_HIP);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_KNEE, SimpleOpenNI.SKEL_LEFT_FOOT);
 
-  context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_RIGHT_HIP);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);  
-
+    context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_RIGHT_HIP);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
+    context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);
+  }
   // calculate new joint movement function sample
   md.jointMovementFunction(userId, SimpleOpenNI.SKEL_LEFT_HAND);
 
-  // plot the movement function
-  md.plotMovementFunction();
-  
+  if (drawMovement)
+  {  // plot the movement function
+    md.plotMovementFunction();
+  }
+
   if (md.swipeStart == 1)
   {
-     println("ONSET START 111111111111111111111111111"); 
+
+    handJerked();
+
+    println("ONSET START:::::" + millis());
   }
-  
-  if (md.swipeEnd == 1)
+  else if (md.onsetState == 1)
   {
-     println("ONSET END 0000000000000000000000000");  
+    handMoved();
   }
+  else
+    if (md.swipeEnd == 1)
+    {
+      newSwarm();
+      println("ONSET END:::::" + millis());
+    }
 }
 
 
@@ -207,6 +366,7 @@ void onEndCalibration(int userId, boolean successfull)
   { 
     println("  User calibrated !!!");
     context.startTrackingSkeleton(userId);
+    drawBG = false;
   } 
   else 
   { 
