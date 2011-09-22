@@ -52,7 +52,7 @@ float        rotY = radians(0);
 
 MoveDetect md;
 
-PImage marioBody, marioHead, marioArm;
+PImage marioBody, marioHead, marioArm, marioBG;
 
 boolean drawLimbs = false;
 boolean drawMovement = false;
@@ -93,6 +93,7 @@ void setup()
   marioBody = loadImage("FieryMarioBody.png");
   marioHead = loadImage("FieryMarioHead.png");
   marioArm = loadImage("FieryMarioLeftArm.png");
+  marioBG = loadImage("mario_bg.png");
 }
 
 void draw()
@@ -102,10 +103,13 @@ void draw()
 
 
   hint(DISABLE_DEPTH_TEST);
-
-  // draw depthImageMap
-  image(context.depthImage(), 0, 0);
-
+  background(marioBG);
+  
+  if (drawBG)
+  {
+    // draw depthImageMap
+    image(context.depthImage(), 0, 0);
+  }
 
 
   for (int i=1; i<3; i++)
@@ -177,13 +181,13 @@ void draw()
   rotateX(rotation.x);
   rotateY(rotation.y);  
   drawHandPositions();
-  
+
 
   // draw mesh as polygon (in white)
-  //drawMesh();
+  drawMesh();
 
   // draw mesh unique points only (in green)
-  //drawMeshUniqueVerts();
+  drawMeshUniqueVerts();
 
   GLGraphics renderer = (GLGraphics)g;
 
@@ -205,7 +209,6 @@ void draw()
   // udpate rotation
   rotation.addSelf(0.014, 0.0237);
   popMatrix();
-  
 }
 
 
@@ -232,19 +235,22 @@ void keyReleased()
     }
     swarms.clear();
     break;
-  
-  case 's': drawLimbs = !drawLimbs;
-  break;
-  
-  case 'v': drawMovement = !drawMovement;
-  break;
-  
-  case 'b': drawBG = !drawBG;
-  break;
-}
-  
-  
-  
+
+  case 's': 
+    drawLimbs = !drawLimbs;
+    break;
+
+  case 'v': 
+    drawMovement = !drawMovement;
+    break;
+
+  case 'b': 
+    drawBG = !drawBG;
+    break;
+  }
+
+
+
   switch(keyCode)
   {
   case UP: 
