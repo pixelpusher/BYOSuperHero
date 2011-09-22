@@ -3,19 +3,14 @@ import SimpleOpenNI.*;
 
 SimpleOpenNI  context;
 
-float prev_x, prev_y, prev_z;
-public static final int numPlotSamples = 256;
-float[] mFunction;
-
-float SMOOTHING = 0.2f;
-PImage marioBody, marioHead, marioArm;
-
+MoveDetect md;
 
 void setup()
 {
   size(640, 480, OPENGL);
 
   context = new SimpleOpenNI(this);
+  md = new MoveDetect();
 
   // enable depthMap generation 
   context.enableDepth();
@@ -165,91 +160,21 @@ void drawSkeleton(int userId)
   context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
   context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);  
 
-  // prepare movement function for plotting by shifting everything back one
-  for (int i = 0;i < (numPlotSamples-1);i++)
-  {
-    mFunction[i] = mFunction[i+1];
-  }
-
-  // add new joint movement function sample to the end
-  mFunction[numPlotSamples-1] = jointMovementFunction(userId, SimpleOpenNI.SKEL_LEFT_HAND);
+  // calculate new joint movement function sample
+  md.jointMovementFunction(userId, SimpleOpenNI.SKEL_LEFT_HAND);
 
   // plot the movement function
-  plotMovementFunction();
-}
-
-// plots the movement function as a signal on the screen
-void plotMovementFunction()
-{
-
-  int xpixel1, xpixel2;
-
-  for (int i = 0;i < (numPlotSamples-1);i++)
+  md.plotMovementFunction();
+  
+  if (md.swipeStart == 1)
   {
-    xpixel1 = (int) round((((float) i) / ((float) numPlotSamples))*((float)context.depthWidth()));
-    xpixel2 = (int) round((((float) i+1) / ((float) numPlotSamples))*((float)context.depthWidth()));
-    stroke(255);
-    line(xpixel1, context.depthHeight()-mFunction[i], xpixel2, context.depthHeight()-mFunction[i+1]);
+     println("ONSET START 111111111111111111111111111"); 
   }
-}
-
-// returns a movement function sample for a given limb
-float jointMovementFunction(int userId, int joint)
-{
-  float d_x, d_y, d_z;  // to hold current differences
-  float diff;        // to hold overall difference
-
-  // PVector to hold joint position
-  PVector jointPos = new PVector();
-
-  // get joint position for the given limb
-  context.getJointPositionSkeleton(userId, joint, jointPos);
-
-  // calculate the difference between current and previous position
-  /*
-  d_x = abs(jointPos.x - prev_x);
-   d_y = abs(jointPos.y - prev_y);
-   d_z = abs(jointPos.z - prev_z);    
-   */
-
-  d_x = abs(jointPos.x - prev_x);
-  d_y = abs(jointPos.y - prev_y);
-  d_z = abs(jointPos.z - prev_z);    
-
-
-  // sum x, y and z differences to get overall movement function sample
-  diff = d_x + d_y + d_z;
-
-  // store current position for next sample point
-  prev_x = lerp(jointPos.x, prev_x, SMOOTHING);
-  prev_y = lerp(jointPos.y, prev_y, SMOOTHING);
-  prev_z = lerp(jointPos.z, prev_z, SMOOTHING);
-
-  // if (diff > thresh)
-  // {
-  // generate swipe events for each limb...
-  //onSwipe(int joint);
-  // }
-
-  // return movement function sample
-  return diff;
-}
-
-
-void keyReleased()
-{
-  switch(keyCode)
+  
+  if (md.swipeEnd == 1)
   {
-  case UP: 
-    SMOOTHING += 0.05;
-    break;
-
-  case DOWN: 
-    SMOOTHING -= 0.05;
-    break;
+     println("ONSET END 0000000000000000000000000");  
   }
-  SMOOTHING = constrain(SMOOTHING, 0.0f, 1.0f);
-  println("SMOOTHING: " + SMOOTHING);
 }
 
 
