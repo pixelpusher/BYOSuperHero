@@ -1,4 +1,4 @@
-void newSwarm()
+void newSwarm(GLTexture tex)
 {
   swarm = new ImageParticleSwarm(this, tex);
  /* 
@@ -64,7 +64,7 @@ void handMoved()
   
     pushMatrix();
     translate(pos.x+width/2,pos.y+height/2);
-    image(tex, 0,0, 32, 32);
+    image(fireballTex, 0,0, 32, 32);
     popMatrix();
 
   pos.rotateX(rotation.x);
@@ -157,7 +157,7 @@ void drawHandPositions()
   {
     pushMatrix();
     translate(v.x,v.y,v.z);
-    image(tex, 0,0, 32, 32);
+    image(fireballTex, 0,0, 32, 32);
     popMatrix();
   }
 } 

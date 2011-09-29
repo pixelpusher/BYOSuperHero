@@ -20,6 +20,8 @@ class MoveDetect
      swipeStart = 0;
      swipeEnd = 0;
      lastStateChange = 0;
+     
+     
   }
   
   // plots the movement function as a signal on the screen
