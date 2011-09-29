@@ -15,15 +15,17 @@ import SimpleOpenNI.*;
 ImageParticleSwarm swarm;
 ParticleExpander particleExpander;
 
-TriangleMesh triMesh;
 
-ArrayList<Vec3D> handPositions;
+TriangleMesh triMesh;  // for drawing flame trails
+Vec2D rotation=new Vec2D();
+
+
+ArrayList<Vec3D> handPositions;  // a list of previous hand positions
 
 Vec3D prev=new Vec3D();
 Vec3D p=new Vec3D();
 Vec3D q=new Vec3D();
 
-Vec2D rotation=new Vec2D();
 
 boolean mouseWasDown = false;
 
@@ -31,9 +33,25 @@ float MIN_DIST = 2.0f;
 float weight=0;
 
 LinkedList<ImageParticleSwarm> swarms;
-GLTexture tex;
+GLTexture fireballTex;
+
+// images for body parts and background:
+GLTexture bodyTex, headTex, armTex, legTex, bgTex;
+
+String bodyTexFile = "FieryMarioBody.png";
+String headTexFile = "FieryMarioHead.png";
+String armTexFile  = "FieryMarioLeftArm.png";
+String legTexFile  = "FieryMarioLeftLeg.png";
+String bgTexFile   = "mario_bg.png";
 
 
+boolean drawLimbs = false;
+boolean drawMovement = false;
+boolean drawBG = true;
+
+
+
+// relevant skeleton positions from our Kinect
 PVector rightShoulderPos = new PVector();
 PVector leftShoulderPos = new PVector();
 PVector rightHipPos = new PVector();
@@ -42,26 +60,22 @@ PVector facePos = new PVector();
 PVector neckPos = new PVector();
 PVector leftHandPos = new PVector();
 PVector rightHandPos = new PVector();
+PVector leftFootPos = new PVector();
+PVector rightFootPos = new PVector();
 
 
+// Kinect-specific variables
 SimpleOpenNI  context;
-float        zoomF =0.5f;
-float        rotX = radians(180);  // by default rotate the hole scene 180deg around the x-axis, 
-// the data from openni comes upside down
-float        rotY = radians(0);
-
 MoveDetect md;
 
-PImage marioBody, marioHead, marioArm, marioBG;
 
-boolean drawLimbs = false;
-boolean drawMovement = false;
-boolean drawBG = true;
 
+///////////////////////////////////////////
+// SETUP
+//
 
 void setup()
 {
-
   size(640, 480, GLConstants.GLGRAPHICS);  
 
   context = new SimpleOpenNI(this);
@@ -73,38 +87,52 @@ void setup()
   // enable skeleton generation for all joints
   context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);
 
-
+  // this next bit of code disables "screen tearing"
   GL gl;
-  PGraphicsOpenGL pgl = (PGraphicsOpenGL) g;  // g may change
+  PGraphicsOpenGL pgl = (PGraphicsOpenGL) g;
   gl = pgl.beginGL();  // always use the GL object returned by beginGL
   gl.setSwapInterval( 1 ); // use value 0 to disable v-sync 
   pgl.endGL();
 
+
+  // create fireball particle "swarm"
   swarms = new LinkedList<ImageParticleSwarm>();
   particleExpander = new ParticleExpander();
 
+  // fire trail
   triMesh =new TriangleMesh("mesh1");
 
   handPositions = new ArrayList<Vec3D>();
 
-  // any particle texture... small is better
-  tex = new GLTexture(this, "mario_fireball.png");
+  //
+  // Load our textures from image files - 
+  //
 
-  marioBody = loadImage("FieryMarioBody.png");
-  marioHead = loadImage("FieryMarioHead.png");
-  marioArm = loadImage("FieryMarioLeftArm.png");
-  marioBG = loadImage("mario_bg.png");
+  // any particle texture... small is better
+  fireballTex = new GLTexture(this, "mario_fireball.png");
+
+  bodyTex = new GLTexture(this, bodyTexFile);
+  headTex = new GLTexture(this, headTexFile);
+  armTex = new GLTexture(this, armTexFile);
+  legTex = new GLTexture(this, legTexFile);
+  bgTex = new GLTexture(this, bgTexFile);
 }
+
+
+
+/////////////////////////////////////////////
+//  DRAW
+//
 
 void draw()
 {
-  // update the cam
+  // update the Kinect cam
   context.update();
 
+  //hint(DISABLE_DEPTH_TEST);
+  background(bgTex);
 
-  hint(DISABLE_DEPTH_TEST);
-  background(marioBG);
-  
+
   if (drawBG)
   {
     // draw depthImageMap
@@ -117,59 +145,107 @@ void draw()
     // draw the skeleton if it's available
     if (context.isTrackingSkeleton(i))
     {  
-      // get joint position for the given limb
+      // get joint positions in 3D world for the tracked limbs
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_LEFT_SHOULDER, leftShoulderPos);
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_RIGHT_SHOULDER, rightShoulderPos);
+
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_LEFT_HIP, leftHipPos);
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_RIGHT_HIP, rightHipPos);
 
-      context.convertRealWorldToProjective(leftShoulderPos, leftShoulderPos);
-      context.convertRealWorldToProjective(rightShoulderPos, rightShoulderPos);
-      context.convertRealWorldToProjective(rightHipPos, rightHipPos);
-      context.convertRealWorldToProjective(leftHipPos, leftHipPos);
-
-      textureMode(NORMALIZED);
-
-      noStroke();
-      beginShape(TRIANGLES);
-      texture(marioBody);    
-      vertex(leftShoulderPos.x-40, leftShoulderPos.y-40, 0, 0);
-      vertex(rightShoulderPos.x+40, rightShoulderPos.y-40, 100, 0);
-      vertex(leftHipPos.x-40, leftHipPos.y+40, 0, 100);
-
-      vertex(rightShoulderPos.x+40, rightShoulderPos.y-40, 100, 0);
-      vertex(rightHipPos.x+40, rightHipPos.y+40, 100, 100);
-      vertex(leftHipPos.x-40, leftHipPos.y+40, 0, 100);
-      endShape();
-
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_HEAD, facePos);
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_NECK, neckPos);
-      context.convertRealWorldToProjective(neckPos, neckPos);
-      context.convertRealWorldToProjective(facePos, facePos);
-
-
-      noStroke();
-      beginShape(TRIANGLES);
-      texture(marioHead);    
-      vertex(facePos.x-80, facePos.y-80, 0, 0);
-      vertex(facePos.x+80, facePos.y-80, 100, 0);
-      vertex(neckPos.x-80, neckPos.y, 0, 100);
-
-      vertex(facePos.x+80, facePos.y-80, 100, 0);
-      vertex(neckPos.x+80, neckPos.y, 100, 100);
-      vertex(neckPos.x-80, neckPos.y, 0, 100);
-      endShape();
 
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_RIGHT_HAND, rightHandPos);
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_LEFT_HAND, leftHandPos);
+
+      context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_LEFT_FOOT, leftFootPos);
+      context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_RIGHT_FOOT, rightFootPos);
+
+      // convert to screen coordinates
+      context.convertRealWorldToProjective(leftShoulderPos, leftShoulderPos);
+      context.convertRealWorldToProjective(rightShoulderPos, rightShoulderPos);
+
+      context.convertRealWorldToProjective(rightHipPos, rightHipPos);
+      context.convertRealWorldToProjective(leftHipPos, leftHipPos);
+
+      context.convertRealWorldToProjective(neckPos, neckPos);
+      context.convertRealWorldToProjective(facePos, facePos);      
+
       context.convertRealWorldToProjective(rightHandPos, rightHandPos);
       context.convertRealWorldToProjective(leftHandPos, leftHandPos);
 
-      // TODO - draw arms!!!
+      context.convertRealWorldToProjective(leftFootPos, leftFootPos);
+      context.convertRealWorldToProjective(rightFootPos, rightFootPos);
 
 
-      drawSkeleton(i);
+      if (i == 1)
+      {
+        // calculate new joint movement function sample
+        md.jointMovementFunction(i, SimpleOpenNI.SKEL_LEFT_HAND);
+      }
+      
+      if (drawMovement)
+      {  // plot the movement function
+        md.plotMovementFunction();
+      }
+
+      if (md.swipeStart == 1)
+      {
+
+        handJerked();
+
+        println("ONSET START:::::" + millis());
+      }
+      else if (md.onsetState == 1)
+      {
+        handMoved();
+      }
+      else
+        if (md.swipeEnd == 1)
+        {
+          newSwarm(fireballTex);
+          println("ONSET END:::::" + millis());
+        }
+
+
+      // note: vectors must be clockwise!
+
+      // void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, float padX, float padY, PImage tex)
+
+noStroke();
+
+//      renderRectFromVectors(leftShoulderPos, rightShoulderPos, rightHipPos, leftHipPos, 0.1f, 0.1f, bodyTex);
+//      
+//      renderRectFromVectors(facePos, neckPos, 0.4f, 0.4f, headTex);
+//      
+//      renderRectFromVectors(leftHipPos, leftFootPos, 0.1f, 0.1f, legTex);      
+//      renderRectFromVectors(rightHipPos, rightFootPos, 0.1f, 0.1f, legTex, 1);      
+//      
+//      renderRectFromVectors(leftShoulderPos, leftHandPos, 0.1f, 0.1f, armTex);      
+//      renderRectFromVectors(rightShoulderPos, rightHandPos, 0.1f, 0.1f, armTex, 1);
+
+      renderRectFromVectors(leftShoulderPos, leftHandPos, 0, 25, armTex);      
+      renderRectFromVectors(rightShoulderPos, rightHandPos, 0, 25, armTex, 1);
+
+
+      renderRectFromVectors(leftShoulderPos, rightShoulderPos, rightHipPos, leftHipPos, 5, 10, bodyTex);
+      
+      renderRectFromVectors(facePos, neckPos, 0, 30, headTex);
+      
+      renderRectFromVectors(leftHipPos, leftFootPos, 0, 30, legTex);      
+      renderRectFromVectors(rightHipPos, rightFootPos, 0, 30, legTex, 1);      
+      
+
+
+      if (drawLimbs)
+      {
+        drawSkeleton(i);
+      }
+      
+    // end of drawing skeleton stuff
     }
+    
+  // end for each user detected  
   }
 
 
@@ -267,79 +343,33 @@ void keyReleased()
 }
 
 
+
 // draw the skeleton with the selected joints
 void drawSkeleton(int userId)
 {
-  // to get the 3d joint data
-
-  /*
-  PVector jointPos = new PVector();
-   context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_HAND,jointPos);
-   println(jointPos);
-   
-   
-   noStroke();
-   fill(200,0,0);
-   rect(10,10,jointPos.x/10,50);
-   
-   fill(0,200,0);
-   rect(10,70,jointPos.y/10,50);
-   
-   fill(0,0,200);
-   rect(10,130,jointPos.z/10,50);
-   */
-
   stroke(255);
   strokeWeight(2);
 
-  if (drawLimbs)
-  {
-    context.drawLimb(userId, SimpleOpenNI.SKEL_HEAD, SimpleOpenNI.SKEL_NECK);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_HEAD, SimpleOpenNI.SKEL_NECK);
 
-    context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_LEFT_SHOULDER);
-    context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW);
-    context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, SimpleOpenNI.SKEL_LEFT_HAND);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_LEFT_SHOULDER);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, SimpleOpenNI.SKEL_LEFT_HAND);
 
-    context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_RIGHT_SHOULDER);
-    context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_ELBOW);
-    context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_RIGHT_SHOULDER);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_ELBOW);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
 
-    context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
-    context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
 
-    context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_LEFT_HIP);
-    context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE);
-    context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_KNEE, SimpleOpenNI.SKEL_LEFT_FOOT);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_LEFT_HIP);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_KNEE, SimpleOpenNI.SKEL_LEFT_FOOT);
 
-    context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_RIGHT_HIP);
-    context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
-    context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);
-  }
-  // calculate new joint movement function sample
-  md.jointMovementFunction(userId, SimpleOpenNI.SKEL_LEFT_HAND);
-
-  if (drawMovement)
-  {  // plot the movement function
-    md.plotMovementFunction();
-  }
-
-  if (md.swipeStart == 1)
-  {
-
-    handJerked();
-
-    println("ONSET START:::::" + millis());
-  }
-  else if (md.onsetState == 1)
-  {
-    handMoved();
-  }
-  else
-    if (md.swipeEnd == 1)
-    {
-      newSwarm();
-      println("ONSET END:::::" + millis());
-    }
+  context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_RIGHT_HIP);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
+  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);
 }
 
 
