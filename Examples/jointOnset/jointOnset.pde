@@ -129,7 +129,7 @@ void draw()
   // update the Kinect cam
   context.update();
 
-  //hint(DISABLE_DEPTH_TEST);
+  hint(DISABLE_DEPTH_TEST);
   background(bgTex);
 
 
@@ -214,26 +214,31 @@ void draw()
 
 noStroke();
 
-//      renderRectFromVectors(leftShoulderPos, rightShoulderPos, rightHipPos, leftHipPos, 0.1f, 0.1f, bodyTex);
-//      
-//      renderRectFromVectors(facePos, neckPos, 0.4f, 0.4f, headTex);
-//      
-//      renderRectFromVectors(leftHipPos, leftFootPos, 0.1f, 0.1f, legTex);      
-//      renderRectFromVectors(rightHipPos, rightFootPos, 0.1f, 0.1f, legTex, 1);      
-//      
-//      renderRectFromVectors(leftShoulderPos, leftHandPos, 0.1f, 0.1f, armTex);      
-//      renderRectFromVectors(rightShoulderPos, rightHandPos, 0.1f, 0.1f, armTex, 1);
-
-      renderRectFromVectors(leftShoulderPos, leftHandPos, 0, 25, armTex);      
-      renderRectFromVectors(rightShoulderPos, rightHandPos, 0, 25, armTex, 1);
-
-
-      renderRectFromVectors(leftShoulderPos, rightShoulderPos, rightHipPos, leftHipPos, 5, 10, bodyTex);
+// draw based on percentages...
+//
+      renderRectFromVectors(leftShoulderPos, rightShoulderPos, rightHipPos, leftHipPos, 0.15f, 0.05f, bodyTex);
       
-      renderRectFromVectors(facePos, neckPos, 0, 30, headTex);
+      renderRectFromVectors(facePos, neckPos, 0f, 1f, headTex);
       
-      renderRectFromVectors(leftHipPos, leftFootPos, 0, 30, legTex);      
-      renderRectFromVectors(rightHipPos, rightFootPos, 0, 30, legTex, 1);      
+      renderRectFromVectors(leftHipPos, leftFootPos, 0f, 0.12f, legTex);      
+      renderRectFromVectors(rightHipPos, rightFootPos, 0f, 0.12f, legTex, 1);      
+      
+      renderRectFromVectors(leftShoulderPos, leftHandPos, 0f, 0.12f, armTex);      
+      renderRectFromVectors(rightShoulderPos, rightHandPos, 0f, 0.12f, armTex, 1);
+
+
+
+// these draw based on pixels
+//
+//      renderRectFromVectors(leftShoulderPos, rightShoulderPos, rightHipPos, leftHipPos, 5, 10, bodyTex);
+//
+//      renderRectFromVectors(leftShoulderPos, leftHandPos, 0, 25, armTex);      
+//      renderRectFromVectors(rightShoulderPos, rightHandPos, 0, 25, armTex, 1);
+//      
+//      renderRectFromVectors(facePos, neckPos, 0, 40, headTex);
+//      
+//      renderRectFromVectors(leftHipPos, leftFootPos, 0, 30, legTex);      
+//      renderRectFromVectors(rightHipPos, rightFootPos, 0, 30, legTex, 1);      
       
 
 

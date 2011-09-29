@@ -146,18 +146,18 @@ void renderRect(float w, float h, PImage tex, int reversed)
 void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, float padX, float padY, PImage tex)
 {
   float pX1 = padX*(p2.x-p1.x);
-  float pX2 = padX*(p4.x-p3.x);
+  float pX2 = padX*(p3.x-p4.x);
 
-  float pY1 = padY*(p2.y-p1.y);
-  float pY2 = padY*(p4.y-p3.y);
+  float pY1 = padY*(p4.y-p1.y);
+  float pY2 = padY*(p3.y-p2.y);
 
   beginShape(TRIANGLES);
   texture(tex);    
   vertex(p1.x-pX1, p1.y-pY1, 0, 0);
-  vertex(p2.x+pX1, p2.y-pY1, 100, 0);
-  vertex(p3.x+pX2, p3.y+pY2, 100, 100);
+  vertex(p2.x+pX1, p2.y-pY2, 100, 0);
+  vertex(p3.x+pX2, p3.y+pY1, 100, 100);
 
-  vertex(p3.x+pX2, p3.y+pY2, 100, 100);
+  vertex(p3.x+pX2, p3.y+pY1, 100, 100);
   vertex(p4.x-pX2, p4.y+pY2, 0, 100);
   vertex(p1.x-pX1, p1.y-pY1, 0, 0);
 
