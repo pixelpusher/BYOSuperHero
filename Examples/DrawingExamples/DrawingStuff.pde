@@ -1,23 +1,23 @@
-// make render rect use width/height and OPTIONAL texture
-// ( texture null)
-
 /*
 // no texture, draw rectangle EXACTLY between vectors at a certain width
  void renderRectFromVectors(PVector p1, PVector p2, int widthPadding);
+ 
+ // simple, with texture
+ void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, PImage tex )
  
  // no texture, with some padding in each direction
  void renderRectFromVectors(PVector p1, PVector p2, int lengthPadding, int widthPadding);
  
  // no reverse
- void renderRectFromVectors(PVector p1, PVector p2,  int widthPadding, int lengthPadding, GLTexture tex);
+ void renderRectFromVectors(PVector p1, PVector p2,  int widthPadding, int lengthPadding, PImage tex);
  
  // this draws a textured rectangle between two points with an absolute width and height in pixels,
  // optionally reversed in x direction
- void renderRectFromVectors(PVector p1, PVector p2,  int widthPadding, int lengthPadding, GLTexture tex, int reversed);
+ void renderRectFromVectors(PVector p1, PVector p2,  int widthPadding, int lengthPadding, PImage tex, int reversed);
  
  
  // this draws a textured rectangle between two points with an *relative* width and height in pixels   
- void renderRectFromVectors(PVector p1, PVector p2, float padEndPercent, float padSidePercent, GLTexture tex);
+ void renderRectFromVectors(PVector p1, PVector p2, float padEndPercent, float padSidePercent, PImage tex);
  
  // untextured rectagle between 4 points 
  void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4);
@@ -32,21 +32,27 @@
 
 
 
-// no texture
+// simple, no texture
 void renderRectFromVectors(PVector p1, PVector p2, int widthPadding)
 {
   renderRectFromVectors(p1, p2, widthPadding, 0, null, 0);
+}
+
+// simple, with texture
+void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, PImage tex )
+{
+  renderRectFromVectors(p1, p2, widthPadding, 0, tex, 0);
 }
 
 
 // no texture
 void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, int lengthPadding)
 {
-  renderRectFromVectors(p1, p2,  widthPadding, lengthPadding, null, 0);
+  renderRectFromVectors(p1, p2, widthPadding, lengthPadding, null, 0);
 }
 
 // no reverse
-void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, int lengthPadding, GLTexture tex)
+void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, int lengthPadding, PImage tex)
 {
   renderRectFromVectors(p1, p2, widthPadding, lengthPadding, tex, 0);
 }
@@ -57,8 +63,7 @@ void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, int lengthP
 // optionally reversed in x direction
 //
 
-
-void renderRectFromVectors(PVector p1, PVector p2,  int widthPadding, int lengthPadding, GLTexture tex, int reversed)
+void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, int lengthPadding, PImage tex, int reversed)
 {
   // rotate the screen the angle btw the two vectors and then draw it rightside-up
   float angle = atan2(p2.y-p1.y, p2.x-p1.x);
@@ -114,13 +119,13 @@ void renderRectFromVectors(PVector p1, PVector p2,  int widthPadding, int length
 // this draws a textured rectangle between two points with an *relative* width and height in pixels   
 //
 
-void renderRectFromVectors(PVector p1, PVector p2, float padEndPercent, float padSidePercent, GLTexture tex)
+void renderRectFromVectors(PVector p1, PVector p2, float padEndPercent, float padSidePercent, PImage tex)
 {
   renderRectFromVectors(p1, p2, padEndPercent, padSidePercent, tex, 0);
 }
 
 
-void renderRectFromVectors(PVector p1, PVector p2, float padEndPercent, float padSidePercent, GLTexture tex, int reversed)
+void renderRectFromVectors(PVector p1, PVector p2, float padEndPercent, float padSidePercent, PImage tex, int reversed)
 {
   // rotate the screen the angle btw the two vectors and then draw it rightside-up
   float angle = atan2(p2.y-p1.y, p2.x-p1.x);
