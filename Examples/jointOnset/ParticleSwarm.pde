@@ -1,12 +1,3 @@
-// this function exists because I didn't feel like re-doing this whole class in straight Java...
-// you can't easily pass a reference to a PApplet inside a pde file, apparently
-/*
-GLModel newGLModel(int numVert, int mode, int usage)
- {
- return new GLModel(this, numVert, mode, usage);
- }
- */
-
 //
 // Swarm of images!!! 
 //

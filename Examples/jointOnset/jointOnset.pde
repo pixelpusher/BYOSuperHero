@@ -203,7 +203,7 @@ void draw()
       else
         if (md.swipeEnd == 1)
         {
-          newSwarm(fireballTex);
+          newSwarm(fireballTex, triMesh);
           println("ONSET END:::::" + millis());
         }
 

@@ -1,4 +1,4 @@
-void newSwarm(GLTexture tex)
+void newSwarm(GLTexture tex, TriangleMesh mesh)
 {
   swarm = new ImageParticleSwarm(this, tex);
  /* 
@@ -14,7 +14,7 @@ void newSwarm(GLTexture tex)
   }
   */
   
-  if (swarm.makeModel( triMesh ))
+  if (swarm.makeModel( mesh ))
   {
     swarms.add( swarm );
 
@@ -26,7 +26,7 @@ void newSwarm(GLTexture tex)
   }
   
   // clear tri mesh
-  triMesh.clear();
+  mesh.clear();
   
   
  // handPositions.clear();

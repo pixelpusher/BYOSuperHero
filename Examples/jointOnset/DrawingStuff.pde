@@ -1,15 +1,64 @@
+// make render rect use width/height and OPTIONAL texture
+// ( texture null)
 
-//
-// this draws a textured rectangle between two points with an absolute width and height in pixels   
-//
+/*
+// no texture, draw rectangle EXACTLY between vectors at a certain width
+ void renderRectFromVectors(PVector p1, PVector p2, int widthPadding);
+ 
+ // no texture, with some padding in each direction
+ void renderRectFromVectors(PVector p1, PVector p2, int lengthPadding, int widthPadding);
+ 
+ // no reverse
+ void renderRectFromVectors(PVector p1, PVector p2,  int widthPadding, int lengthPadding, GLTexture tex);
+ 
+ // this draws a textured rectangle between two points with an absolute width and height in pixels,
+ // optionally reversed in x direction
+ void renderRectFromVectors(PVector p1, PVector p2,  int widthPadding, int lengthPadding, GLTexture tex, int reversed);
+ 
+ 
+ // this draws a textured rectangle between two points with an *relative* width and height in pixels   
+ void renderRectFromVectors(PVector p1, PVector p2, float padEndPercent, float padSidePercent, GLTexture tex);
+ 
+ // untextured rectagle between 4 points 
+ void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4);
+ 
+ // textured rectangle between 4 points
+ void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, PImage tex);
+ 
+ // Render a clockwise list of vectors as a (optionally) textured rectangle with padding
+ void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, int padX, int padY, PImage tex);
+ */
 
-void renderRectFromVectors(PVector p1, PVector p2, int padEnds, int padSides, GLTexture tex)
+
+
+
+// no texture
+void renderRectFromVectors(PVector p1, PVector p2, int widthPadding)
 {
-  renderRectFromVectors(p1, p2, padEnds, padSides, tex, 0);
+  renderRectFromVectors(p1, p2, widthPadding, 0, null, 0);
 }
 
 
-void renderRectFromVectors(PVector p1, PVector p2, int padEnds, int padSides, GLTexture tex, int reversed)
+// no texture
+void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, int lengthPadding)
+{
+  renderRectFromVectors(p1, p2,  widthPadding, lengthPadding, null, 0);
+}
+
+// no reverse
+void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, int lengthPadding, GLTexture tex)
+{
+  renderRectFromVectors(p1, p2, widthPadding, lengthPadding, tex, 0);
+}
+
+
+//
+// this draws a textured rectangle between two points with an absolute width and height in pixels,
+// optionally reversed in x direction
+//
+
+
+void renderRectFromVectors(PVector p1, PVector p2,  int widthPadding, int lengthPadding, GLTexture tex, int reversed)
 {
   // rotate the screen the angle btw the two vectors and then draw it rightside-up
   float angle = atan2(p2.y-p1.y, p2.x-p1.x);
@@ -22,7 +71,7 @@ void renderRectFromVectors(PVector p1, PVector p2, int padEnds, int padSides, GL
   float yCenter = p1.y - h2;
 
   // height of the shape
-  float h = sqrt( xdiff*xdiff + ydiff*ydiff)+ padEnds*2.0f;
+  float h = sqrt( xdiff*xdiff + ydiff*ydiff) + lengthPadding*2.0f;
 
   //ellipse(xCenter, yCenter, 10, 10);  
 
@@ -37,29 +86,27 @@ void renderRectFromVectors(PVector p1, PVector p2, int padEnds, int padSides, GL
   rotate(angle);
 
   // center screen
-  translate( -h*0.5f, -padSides);
+  translate( -h*0.5f, -widthPadding/2);
 
-  renderRect(h, padSides*2.0f, tex, reversed);
+  renderRect(h, widthPadding, tex, reversed);
 
   popMatrix();
 
-
-
   // another way to do it...  
   // center screen
-  //  translate( -h*0.5f, padSides);
+  //  translate( -h*0.5f, widthPadding);
   //
   //  rotate(-HALF_PI);
-  //  tex.render(0,0,padSides*2.0f,h);
+  //  tex.render(0,0,widthPadding*2.0f,h);
   //  popMatrix();
 
 
   // for debugging...
-//  stroke(0);
-//  strokeWeight(1.0);  
-//  fill(0, 60);
-//  ellipse(p1.x, p1.y, 10, 10);
-//  ellipse(p2.x, p2.y, 10, 10);
+  //  stroke(0);
+  //  strokeWeight(1.0);  
+  //  fill(0, 60);
+  //  ellipse(p1.x, p1.y, 10, 10);
+  //  ellipse(p2.x, p2.y, 10, 10);
 }
 
 
@@ -88,7 +135,7 @@ void renderRectFromVectors(PVector p1, PVector p2, float padEndPercent, float pa
 
   // height of the shape
   float h = sqrt( xdiff*xdiff + ydiff*ydiff);
-  float padSides = h*padSidePercent;
+  float widthPadding = h*padSidePercent;
 
   h +=  h*padEndPercent*2.0f;
 
@@ -104,9 +151,9 @@ void renderRectFromVectors(PVector p1, PVector p2, float padEndPercent, float pa
   rotate(angle);
 
   // center screen
-  translate( -h*0.5f, -padSides);
+  translate( -h*0.5f, -widthPadding/2);
 
-  renderRect(h, padSides*2.0f, tex, reversed);
+  renderRect(h, widthPadding, tex, reversed);
 
   popMatrix();
 }
@@ -127,21 +174,48 @@ void renderRect(float w, float h, PImage tex, int reversed)
 
   // now draw rightside up
   beginShape(TRIANGLES);
-  texture(tex);
-  vertex(0, 0, 1-reversed, 0);
-  vertex(w, 0, 1-reversed, 1);
-  vertex(w, h, reversed-0, 1);
+  if (tex != null)
+  {
+    texture(tex);
+    vertex(0, 0, 1-reversed, 0);
+    vertex(w, 0, 1-reversed, 1);
+    vertex(w, h, reversed-0, 1);
 
-  vertex(w, h, reversed-0, 1);
-  vertex(0, h, reversed-0, 0);
-  vertex(0, 0, 1-reversed, 0);      
+    vertex(w, h, reversed-0, 1);
+    vertex(0, h, reversed-0, 0);
+    vertex(0, 0, 1-reversed, 0);
+  }
+  else
+  {
+    vertex(0, 0);
+    vertex(w, 0);
+    vertex(w, h);
+
+    vertex(w, h);
+    vertex(0, h);
+    vertex(0, 0);
+  }
   endShape(CLOSE);
 }
 
 
 
+// untextured rectagle between 4 points 
+void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4)
+{
+  renderRectFromVectors( p1, p2, p3, p4, 0, 0, null);
+}
+
+
+// textured rectangle between 4 points
+void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, PImage tex)
+{
+  renderRectFromVectors( p1, p2, p3, p4, 0, 0, tex);
+}
+
+
 //
-// Render a clockwise list of vectors as a colelction of textured triangles 
+// Render a clockwise list of vectors as a (optionally) textured rectangle with padding  
 //
 void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, float padX, float padY, PImage tex)
 {
@@ -152,20 +226,32 @@ void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, float
   float pY2 = padY*(p3.y-p2.y);
 
   beginShape(TRIANGLES);
-  texture(tex);    
-  vertex(p1.x-pX1, p1.y-pY1, 0, 0);
-  vertex(p2.x+pX1, p2.y-pY2, 100, 0);
-  vertex(p3.x+pX2, p3.y+pY1, 100, 100);
+  if (tex != null)
+  {
+    texture(tex);
+    vertex(p1.x-pX1, p1.y-pY1, 0, 0);
+    vertex(p2.x+pX1, p2.y-pY2, 100, 0);
+    vertex(p3.x+pX2, p3.y+pY1, 100, 100);
 
-  vertex(p3.x+pX2, p3.y+pY1, 100, 100);
-  vertex(p4.x-pX2, p4.y+pY2, 0, 100);
-  vertex(p1.x-pX1, p1.y-pY1, 0, 0);
+    vertex(p3.x+pX2, p3.y+pY1, 100, 100);
+    vertex(p4.x-pX2, p4.y+pY2, 0, 100);
+    vertex(p1.x-pX1, p1.y-pY1, 0, 0);
+  }
+  else
+  {
+    vertex(p1.x-pX1, p1.y-pY1);
+    vertex(p2.x+pX1, p2.y-pY2);
+    vertex(p3.x+pX2, p3.y+pY1);
 
+    vertex(p3.x+pX2, p3.y+pY1);
+    vertex(p4.x-pX2, p4.y+pY2);
+    vertex(p1.x-pX1, p1.y-pY1);
+  }
   endShape();
 }
 
 //
-// Render a clockwise list of vectors as a colelction of textured triangles 
+// Render a clockwise list of vectors as a (optionally) textured rectangle with padding
 //
 void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, int padX, int padY, PImage tex)
 {
@@ -176,15 +262,27 @@ void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, int p
   float pY2 = padY;
 
   beginShape(TRIANGLES);
-  texture(tex);    
-  vertex(p1.x-pX1, p1.y-pY1, 0, 0);
-  vertex(p2.x+pX1, p2.y-pY1, 100, 0);
-  vertex(p3.x+pX2, p3.y+pY2, 100, 100);
+  if (tex != null)
+  {
+    texture(tex);    
+    vertex(p1.x-pX1, p1.y-pY1, 0, 0);
+    vertex(p2.x+pX1, p2.y-pY1, 100, 0);
+    vertex(p3.x+pX2, p3.y+pY2, 100, 100);
 
-  vertex(p3.x+pX2, p3.y+pY2, 100, 100);
-  vertex(p4.x-pX2, p4.y+pY2, 0, 100);
-  vertex(p1.x-pX1, p1.y-pY1, 0, 0);
+    vertex(p3.x+pX2, p3.y+pY2, 100, 100);
+    vertex(p4.x-pX2, p4.y+pY2, 0, 100);
+    vertex(p1.x-pX1, p1.y-pY1, 0, 0);
+  }
+  else
+  {
+    vertex(p1.x-pX1, p1.y-pY1);
+    vertex(p2.x+pX1, p2.y-pY1);
+    vertex(p3.x+pX2, p3.y+pY2);
 
+    vertex(p3.x+pX2, p3.y+pY2);
+    vertex(p4.x-pX2, p4.y+pY2);
+    vertex(p1.x-pX1, p1.y-pY1);
+  }
   endShape();
 }
 

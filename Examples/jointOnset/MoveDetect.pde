@@ -12,6 +12,8 @@ class MoveDetect
   int lastStateChange;
   int stateChangeInterval = 1000; // in ms
   
+  
+  
   MoveDetect()
   {
      mFunction = new float[numPlotSamples]; 
@@ -20,9 +22,10 @@ class MoveDetect
      swipeStart = 0;
      swipeEnd = 0;
      lastStateChange = 0;
-     
-     
   }
+  
+  
+  
   
   // plots the movement function as a signal on the screen
   void plotMovementFunction()
@@ -86,10 +89,14 @@ class MoveDetect
     mFunction[numPlotSamples-1] = cursample; // add new function to the end
   }
 
+
+
   void onSwipe(int joint)
   {
      println("ONSET!!!!!!!!!!!!"); 
   }  
+  
+  
   
   // see if an swipe start has started or ended
   void onsetStateVerify(int cur_state)
