@@ -130,7 +130,7 @@ void draw()
   context.update();
 
   hint(DISABLE_DEPTH_TEST);
-  background(bgTex);
+  bgTex.render(0,0,width,height);
 
 
   if (drawBG)
