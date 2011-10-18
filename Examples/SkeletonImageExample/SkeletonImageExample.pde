@@ -60,7 +60,6 @@ void setup()
 
   // enable skeleton generation for all joints
   context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);
-
 }
 
 
@@ -77,64 +76,91 @@ void draw()
 
 
 
-  
-    // draw the skeleton if it's available
-    if (context.isTrackingSkeleton(skelID))
-    {  
-      // get joint positions in 3D world for the tracked limbs
-      context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_LEFT_SHOULDER, leftShoulderPos);
-      context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_RIGHT_SHOULDER, rightShoulderPos);
 
-      context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_LEFT_HIP, leftHipPos);
-      context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_RIGHT_HIP, rightHipPos);
+  // draw the skeleton if it's available
+  if (context.isTrackingSkeleton(skelID))
+  {  
+    // get joint positions in 3D world for the tracked limbs
+    context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_LEFT_SHOULDER, leftShoulderPos);
+    context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_RIGHT_SHOULDER, rightShoulderPos);
 
-      context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_HEAD, facePos);
-      context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_NECK, neckPos);
+    context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_LEFT_HIP, leftHipPos);
+    context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_RIGHT_HIP, rightHipPos);
 
-      context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_RIGHT_HAND, rightHandPos);
-      context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_LEFT_HAND, leftHandPos);
+    context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_HEAD, facePos);
+    context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_NECK, neckPos);
 
-      context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_LEFT_FOOT, leftFootPos);
-      context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_RIGHT_FOOT, rightFootPos);
+    context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_RIGHT_HAND, rightHandPos);
+    context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_LEFT_HAND, leftHandPos);
 
-      // convert to screen coordinates
-      context.convertRealWorldToProjective(leftShoulderPos, leftShoulderPos);
-      context.convertRealWorldToProjective(rightShoulderPos, rightShoulderPos);
+    context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_LEFT_FOOT, leftFootPos);
+    context.getJointPositionSkeleton(skelID, SimpleOpenNI.SKEL_RIGHT_FOOT, rightFootPos);
 
-      context.convertRealWorldToProjective(rightHipPos, rightHipPos);
-      context.convertRealWorldToProjective(leftHipPos, leftHipPos);
+    // convert to screen coordinates
+    context.convertRealWorldToProjective(leftShoulderPos, leftShoulderPos);
+    context.convertRealWorldToProjective(rightShoulderPos, rightShoulderPos);
 
-      context.convertRealWorldToProjective(neckPos, neckPos);
-      context.convertRealWorldToProjective(facePos, facePos);      
+    context.convertRealWorldToProjective(rightHipPos, rightHipPos);
+    context.convertRealWorldToProjective(leftHipPos, leftHipPos);
 
-      context.convertRealWorldToProjective(rightHandPos, rightHandPos);
-      context.convertRealWorldToProjective(leftHandPos, leftHandPos);
+    context.convertRealWorldToProjective(neckPos, neckPos);
+    context.convertRealWorldToProjective(facePos, facePos);      
 
-      context.convertRealWorldToProjective(leftFootPos, leftFootPos);
-      context.convertRealWorldToProjective(rightFootPos, rightFootPos);
+    context.convertRealWorldToProjective(rightHandPos, rightHandPos);
+    context.convertRealWorldToProjective(leftHandPos, leftHandPos);
 
-
+    context.convertRealWorldToProjective(leftFootPos, leftFootPos);
+    context.convertRealWorldToProjective(rightFootPos, rightFootPos);
 
 
 
-// these draw based on pixels
+
+
+    // these draw based on pixels
 
       renderRectFromVectors(leftShoulderPos, rightShoulderPos, rightHipPos, leftHipPos, 5, 10, bodyTex);
 
-      renderRectFromVectors(leftShoulderPos, leftHandPos, 25, armTex);      
-      renderRectFromVectors(rightShoulderPos, rightHandPos, 25, armTex, 1);
-      
-      renderRectFromVectors(facePos, neckPos, 40, 40, headTex);
-      
-      renderRectFromVectors(leftHipPos, leftFootPos, 0, 30, legTex);      
-      renderRectFromVectors(rightHipPos, rightFootPos, 0, 30, legTex, 1);     
-      
+    renderRectFromVectors(leftShoulderPos, leftHandPos, 25, armTex);      
+    renderRectFromVectors(rightShoulderPos, rightHandPos, 25, armTex, 1);
+
+    renderRectFromVectors(facePos, neckPos, 40, 40, headTex);
+
+    renderRectFromVectors(leftHipPos, leftFootPos, 0, 30, legTex);      
+    renderRectFromVectors(rightHipPos, rightFootPos, 0, 30, legTex, 1);     
+
     // end of drawing skeleton stuff
-    }
   }
-  
-  
-  
+}
+
+
+
+void keyReleased()
+{
+  switch(key)
+  {
+  case '1': 
+    skelID = 1;
+    break;
+
+  case '2': 
+    skelID = 2;
+    break;
+
+  case '3': 
+    skelID = 3;
+    break;
+
+  case '4': 
+    skelID = 4;
+    break;
+
+  case '5': 
+    skelID = 5;
+    break;
+  }
+}
+
+
 // -----------------------------------------------------------------
 // SimpleOpenNI events
 

@@ -34,7 +34,7 @@ void setup()
   fft = new FFT(in.bufferSize(), in.sampleRate());
 
   // initialize the rings variables (NECESSARY)
-  initRings();
+  initRings(in);
 
   // GUI controls
   controlP5 = new ControlP5(this);

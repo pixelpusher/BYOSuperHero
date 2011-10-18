@@ -50,8 +50,8 @@ void drawRings(float x, float y)
       float dx = sin(angle)*r;
       float dy = cos(angle)*r;
 
-      vertex(x + thickness.value()*dx, y + thickness.value()*dy, rcount*spacing.value());
       vertex(x + dx, y + dy, rcount*spacing.value());
+      vertex(x + thickness.value()*dx, y + thickness.value()*dy, rcount*spacing.value());
     }
     endShape(CLOSE);
     ++rcount;
