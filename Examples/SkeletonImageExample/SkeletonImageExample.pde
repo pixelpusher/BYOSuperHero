@@ -46,6 +46,12 @@ void setup()
 {
   size(640, 480, OPENGL);  
 
+  bodyTex = loadImage(bodyTexFile);
+  headTex = loadImage(headTexFile);
+  armTex = loadImage(armTexFile);
+  legTex = loadImage(legTexFile);
+
+
   context = new SimpleOpenNI(this);
 
 
@@ -115,10 +121,10 @@ void draw()
 
       renderRectFromVectors(leftShoulderPos, rightShoulderPos, rightHipPos, leftHipPos, 5, 10, bodyTex);
 
-      renderRectFromVectors(leftShoulderPos, leftHandPos, 0, 25, armTex);      
-      renderRectFromVectors(rightShoulderPos, rightHandPos, 0, 25, armTex, 1);
+      renderRectFromVectors(leftShoulderPos, leftHandPos, 25, armTex);      
+      renderRectFromVectors(rightShoulderPos, rightHandPos, 25, armTex, 1);
       
-      renderRectFromVectors(facePos, neckPos, 0, 40, headTex);
+      renderRectFromVectors(facePos, neckPos, 40, 40, headTex);
       
       renderRectFromVectors(leftHipPos, leftFootPos, 0, 30, legTex);      
       renderRectFromVectors(rightHipPos, rightFootPos, 0, 30, legTex, 1);     
@@ -126,3 +132,58 @@ void draw()
     // end of drawing skeleton stuff
     }
   }
+  
+  
+  
+// -----------------------------------------------------------------
+// SimpleOpenNI events
+
+void onNewUser(int userId)
+{
+  println("onNewUser - userId: " + userId);
+  println("  start pose detection");
+
+  context.startPoseDetection("Psi", userId);
+}
+
+void onLostUser(int userId)
+{
+  println("onLostUser - userId: " + userId);
+}
+
+void onStartCalibration(int userId)
+{
+  println("onStartCalibration - userId: " + userId);
+}
+
+void onEndCalibration(int userId, boolean successfull)
+{
+  println("onEndCalibration - userId: " + userId + ", successfull: " + successfull);
+
+  if (successfull) 
+  { 
+    println("  User calibrated !!!");
+    context.startTrackingSkeleton(userId);
+  } 
+  else 
+  { 
+    println("  Failed to calibrate user !!!");
+    println("  Start pose detection");
+    context.startPoseDetection("Psi", userId);
+  }
+}
+
+void onStartPose(String pose, int userId)
+{
+  println("onStartPose - userId: " + userId + ", pose: " + pose);
+  println(" stop pose detection");
+
+  context.stopPoseDetection(userId); 
+  context.requestCalibrationSkeleton(userId, true);
+}
+
+void onEndPose(String pose, int userId)
+{
+  println("onEndPose - userId: " + userId + ", pose: " + pose);
+}
+

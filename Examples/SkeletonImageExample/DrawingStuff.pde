@@ -44,6 +44,12 @@ void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, PImage tex 
   renderRectFromVectors(p1, p2, widthPadding, 0, tex, 0);
 }
 
+// simple, with texture
+void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, PImage tex, int reversed )
+{
+  renderRectFromVectors(p1, p2, widthPadding, 0, tex, reversed);
+}
+
 
 // no texture
 void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, int lengthPadding)
