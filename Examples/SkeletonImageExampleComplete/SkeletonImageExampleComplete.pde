@@ -64,8 +64,11 @@ void setup()
 
 void draw()
 {
-  // update the Kinect cam
+ // update the Kinect cam
   context.update();
+
+  // draw depthImageMap
+  image(context.depthImage(), 0, 0);
 
 
   // draw only the current:
@@ -78,13 +81,15 @@ void draw()
     // if it is calibrated
     if (skel.calibrated)
     {
-      // these draw based on pixels
+      // update skeleton joints coordinates
+      skel.update(context);
+       // these draw based on pixels
       renderRectFromVectors(skel.leftShoulderPos, skel.rightShoulderPos, skel.rightHipPos, skel.leftHipPos, 5, 10, bodyTex);
 
       renderRectFromVectors(skel.leftShoulderPos, skel.leftHandPos, 25, armTex);      
       renderRectFromVectors(skel.rightShoulderPos, skel.rightHandPos, 25, armTex, 1);
 
-      renderRectFromVectors(skel.facePos, skel.neckPos, 40, 40, headTex);
+      renderRectFromVectors(skel.facePos, skel.neckPos, 40, 0, headTex);
 
       renderRectFromVectors(skel.leftHipPos, skel.leftFootPos, 30, legTex);      
       renderRectFromVectors(skel.rightHipPos, skel.rightFootPos, 30, legTex, 1);
@@ -141,143 +146,3 @@ void keyReleased()
     break;
   }
 }
-
-
-
-// -----------------------------------------------------------------
-// SimpleOpenNI event handlers -- these add and remove skeletons from our list
-
-void onNewUser(int userId)
-{
-  println("onNewUser - userId: " + userId);
-  println("  start pose detection");
-
-  context.startPoseDetection("Psi", userId);
-
-
-  // add to list of skeletons if this id doesn't already exist
-  ListIterator<Skeleton> iterator = skeletons.listIterator();
-
-  boolean found = false;
-
-  while ( !found && iterator.hasNext () )
-  {
-    Skeleton s = iterator.next();
-    if (s.id == userId)
-    {
-      // we're already tracking this skeleton
-      found = true;
-      s.calibrated = false;
-      break;
-    }
-  }
-
-  // start tracking this one if not found in our list
-  if (!found)
-  {
-    iterator.add(new Skeleton(userId) );
-
-    // reset iterator
-    currentSkeletonIter = skeletons.listIterator();
-  }
-}
-
-
-void onLostUser(int userId)
-{
-  println("onLostUser - userId: " + userId);
-
-  // add to list of skeletons if this id doesn't already exist
-  ListIterator<Skeleton> iterator = skeletons.listIterator();
-
-  boolean found = false;
-
-  while ( !found && iterator.hasNext () )
-  {
-    Skeleton s = iterator.next();
-    if (s.id == userId)
-    {
-      iterator.remove();
-
-      // reset iterator
-      currentSkeletonIter = skeletons.listIterator();     
-      break;
-    }
-  }
-}
-
-
-
-void onStartCalibration(int userId)
-{
-  println("onStartCalibration - userId: " + userId);
-
-  boolean found = false;
-
-  ListIterator<Skeleton> iterator = skeletons.listIterator();
-
-  while ( !found && iterator.hasNext () )
-  {
-    Skeleton s = iterator.next();
-    if (s.id == userId)
-    {
-      s.calibrated = false;
-      found = true;
-      break;
-    }
-  }
-}
-
-
-void onEndCalibration(int userId, boolean successful)
-{
-  println("onEndCalibration - userId: " + userId + ", successful: " + successful);
-
-  if (successful) 
-  {
-    println("  User calibrated !!!");
-    context.startTrackingSkeleton(userId);
-  } 
-  else 
-  { 
-    println("  Failed to calibrate user !!!");
-    println("  Start pose detection");
-    context.startPoseDetection("Psi", userId);
-  }
-
-  boolean found = false;
-
-  ListIterator<Skeleton> iterator = skeletons.listIterator();
-
-  while ( !found && iterator.hasNext () )
-  {
-    Skeleton s = iterator.next();
-    if (s.id == userId)
-    {
-      s.calibrated = successful;
-      found = true;
-
-      // set as current skeleton    
-      if (successful)
-        currentSkeleton = s;
-
-      break;
-    }
-  }
-}
-
-
-void onStartPose(String pose, int userId)
-{
-  println("onStartPose - userId: " + userId + ", pose: " + pose);
-  println(" stop pose detection");
-
-  context.stopPoseDetection(userId); 
-  context.requestCalibrationSkeleton(userId, true);
-}
-
-void onEndPose(String pose, int userId)
-{
-  println("onEndPose - userId: " + userId + ", pose: " + pose);
-}
-
