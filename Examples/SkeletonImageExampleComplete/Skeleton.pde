@@ -146,8 +146,7 @@ class Skeleton
 
   float worldDepthToScreen(float z)
   {
-    return (abs(z) < EPSILON) : 
-    0 ? 525.0f/z;
+    return (abs(z) < EPSILON) ? 0 : 525.0f/z;
   }
 
   // end class Skeleton
