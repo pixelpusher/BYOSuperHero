@@ -22,7 +22,7 @@ String legTexFile  = "FieryMarioLeftLeg.png";
 // these are our user's skeleton data
 ArrayList<Skeleton> skeletons = new ArrayList<Skeleton>();
 
-// the current skeleton we want to draw
+// shortcut to the current skeleton we want to draw
 Skeleton currentSkeleton = null;
 
 // current skeleton iterator
@@ -68,11 +68,11 @@ void draw()
   context.update();
 
 
-  // draw the current 
-  //  if (currentSkeleton != null)
+  // draw only the current:
+  //  if (currentSkeleton != null && currentSkeleton.calibrated)
   //  {
 
-  // for all our skeletons
+  // draw all our skeletons
   for (Skeleton skel : skeletons)
   { 
     // if it is calibrated
@@ -105,19 +105,39 @@ void keyReleased()
   case ',': 
     // next element
     if ( currentSkeletonIter.hasNext() ) 
-      currentSkeletonIter.next();
+    {
+      currentSkeleton = currentSkeletonIter.next();
+    }
     else
+    {
       // back to the beginning! 
       currentSkeletonIter = skeletons.listIterator();
+      if ( currentSkeletonIter.hasNext() ) 
+      {
+        currentSkeleton = currentSkeletonIter.next();
+      } 
+      else
+        currentSkeleton = null;
+    }
     break;
 
   case '.': 
     // next element
     if ( currentSkeletonIter.hasPrevious() ) 
-      currentSkeletonIter.previous();
+    {
+      currentSkeleton = currentSkeletonIter.previous();
+    }
     else
-      // back to the end! 
-      currentSkeletonIter = skeletons.listIterator(skeletons.size()-1);
+    {
+      if (skeletons.size() > 0)
+      {
+        // back to the end! 
+        currentSkeletonIter = skeletons.listIterator(skeletons.size()-1);
+        currentSkeleton = currentSkeletonIter.next();
+      }
+      else
+        currentSkeleton = null;
+    }
     break;
   }
 }
@@ -194,6 +214,8 @@ void onStartCalibration(int userId)
 
   boolean found = false;
 
+  ListIterator<Skeleton> iterator = skeletons.listIterator();
+
   while ( !found && iterator.hasNext () )
   {
     Skeleton s = iterator.next();
@@ -207,11 +229,11 @@ void onStartCalibration(int userId)
 }
 
 
-void onEndCalibration(int userId, boolean successfull)
+void onEndCalibration(int userId, boolean successful)
 {
-  println("onEndCalibration - userId: " + userId + ", successfull: " + successfull);
+  println("onEndCalibration - userId: " + userId + ", successful: " + successful);
 
-  if (successfull) 
+  if (successful) 
   {
     println("  User calibrated !!!");
     context.startTrackingSkeleton(userId);
@@ -225,17 +247,19 @@ void onEndCalibration(int userId, boolean successfull)
 
   boolean found = false;
 
+  ListIterator<Skeleton> iterator = skeletons.listIterator();
+
   while ( !found && iterator.hasNext () )
   {
     Skeleton s = iterator.next();
     if (s.id == userId)
     {
-      s.calibrated = successfull;
+      s.calibrated = successful;
       found = true;
 
       // set as current skeleton    
       if (successful)
-        currrentSkeleton = s;
+        currentSkeleton = s;
 
       break;
     }
