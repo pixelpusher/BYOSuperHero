@@ -3,7 +3,7 @@ class Skeleton
 {
   // the userid from OpenNI
   int id = 1;
-  
+
   // are we calibrated and ready to draw?
   boolean calibrated = false;
 
@@ -63,7 +63,8 @@ class Skeleton
   // Default constructor
   //
   Skeleton()
-  { }
+  {
+  }
 
   // 
   // Constructor with id
@@ -109,24 +110,46 @@ class Skeleton
 
       // convert to screen coordinates
       context.convertRealWorldToProjective(leftShoulderPos, leftShoulderPosWorld);
+
+
       context.convertRealWorldToProjective(rightShoulderPos, rightShoulderPosWorld);
+      leftShoulderPos.z = worldDepthToScreen(leftShoulderPos.z);
 
       context.convertRealWorldToProjective(rightHipPos, rightHipPosWorld);
+      rightHipPos.z = worldDepthToScreen(rightHipPos.z);
+
       context.convertRealWorldToProjective(leftHipPos, leftHipPosWorld);
+      leftHipPos.z = worldDepthToScreen(leftHipPos.z);
 
       context.convertRealWorldToProjective(neckPos, neckPosWorld);
+      neckPos.z = worldDepthToScreen(neckPos.z);
+
       context.convertRealWorldToProjective(facePos, facePosWorld);      
+      facePos.z = worldDepthToScreen(facePos.z);
 
       context.convertRealWorldToProjective(rightHandPos, rightHandPosWorld);
+      rightHandPos.z = worldDepthToScreen(rightHandPos.z);
+
       context.convertRealWorldToProjective(leftHandPos, leftHandPosWorld);
+      leftHandPos.z = worldDepthToScreen(leftHandPos.z);
 
       context.convertRealWorldToProjective(leftFootPos, leftFootPosWorld);
+      leftFootPos.z = worldDepthToScreen(leftFootPos.z);
+
       context.convertRealWorldToProjective(rightFootPos, rightFootPosWorld);
+      rightFootPos.z = worldDepthToScreen(rightFootPos.z);
     }
     // return reference to this object
     return this;
   }  
-  
-// end class Skeleton  
+
+
+  float worldDepthToScreen(float z)
+  {
+    return (abs(z) < EPSILON) : 
+    0 ? 525.0f/z;
+  }
+
+  // end class Skeleton
 }
 
