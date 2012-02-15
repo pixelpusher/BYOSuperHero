@@ -263,8 +263,17 @@ void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, float
   endShape();
 }
 
+
 //
-// Render a clockwise list of vectors as a (optionally) textured rectangle with padding
+// Render a clockwise list of vectors as a rectangle with padding
+//
+void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, int padX, int padY)
+{
+  renderRectFromVectors( p1,  p2,  p3,  p4,  padX,  padY, null);
+}
+
+//
+// Render a clockwise list of vectors as an (optionally) textured rectangle with padding
 //
 void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, int padX, int padY, PImage tex)
 {

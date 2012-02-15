@@ -1,4 +1,4 @@
-// Swarming points using GLModel and GLCamera, using sprite textures.
+// Mario fireballer puppet, using GLModel and fireball sprite textures.
 // By Evan Raskob
 
 

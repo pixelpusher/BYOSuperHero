@@ -86,8 +86,11 @@ void draw()
        // these draw based on pixels
       renderRectFromVectors(skel.leftShoulderPos, skel.rightShoulderPos, skel.rightHipPos, skel.leftHipPos, 5, 10, bodyTex);
 
-      renderRectFromVectors(skel.leftShoulderPos, skel.leftHandPos, 25, armTex);      
-      renderRectFromVectors(skel.rightShoulderPos, skel.rightHandPos, 25, armTex, 1);
+       renderRectFromVectors(skel.leftShoulderPos, skel.leftElbowPos, 25);      
+       renderRectFromVectors(skel.rightShoulderPos, skel.rightElbowPos, 25, 1);
+       
+       renderRectFromVectors(skel.leftElbowPos, skel.leftHandPos, 25);      
+       renderRectFromVectors(skel.rightElbowPos, skel.rightHandPos, 25, 1);
 
       renderRectFromVectors(skel.facePos, skel.neckPos, 40, 0, headTex);
 
