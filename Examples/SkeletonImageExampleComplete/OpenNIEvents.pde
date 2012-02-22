@@ -103,6 +103,9 @@ void onEndCalibration(int userId, boolean successful)
   {
     println("  User calibrated !!!");
     context.startTrackingSkeleton(userId);
+
+    // stop drawing depth image
+    drawDepthImage = false;
   } 
   else 
   { 

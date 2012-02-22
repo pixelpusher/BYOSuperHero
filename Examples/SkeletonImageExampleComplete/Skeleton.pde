@@ -139,6 +139,12 @@ class Skeleton
       context.convertRealWorldToProjective(leftElbowPosWorld, leftElbowPos);
       leftElbowPos.z = worldDepthToScreen(leftElbowPos.z);
 
+      context.convertRealWorldToProjective(leftKneePosWorld, leftKneePos);
+      leftKneePos.z = worldDepthToScreen(leftKneePos.z);
+
+      context.convertRealWorldToProjective(rightKneePosWorld, rightKneePos);
+      rightKneePos.z = worldDepthToScreen(rightKneePos.z);
+
 
       context.convertRealWorldToProjective(leftFootPosWorld, leftFootPos);
       leftFootPos.z = worldDepthToScreen(leftFootPos.z);
@@ -153,7 +159,7 @@ class Skeleton
 
   float worldDepthToScreen(float z)
   {
-    return (abs(z) < EPSILON) ? 0 : 525.0f/z;
+    return (abs(z) < EPSILON) ? 0f : 525.0f/z;
   }
 
   // end class Skeleton
