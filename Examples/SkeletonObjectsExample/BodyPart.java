@@ -64,6 +64,7 @@ public abstract class BodyPart
   public abstract BodyPart update(float[] lag); 
 
   public abstract PVector getJoint(int type); 
+  public abstract PVector getPrevJoint(int type); 
 
   /*
    * Useful for getting the screen depth for a given world depth

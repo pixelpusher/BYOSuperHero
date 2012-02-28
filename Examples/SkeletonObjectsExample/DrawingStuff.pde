@@ -1,30 +1,6 @@
-//import core.processing.*;
-
-//
-// BASE INTERFACE
-//
-
-public interface BodyPartRenderer
-{
-  // public PGraphics renderer;
-
-  // public BodyPartRenderer(PGraphics g);
-
-
-  /*
-   * render a full skeleton, part-by-part
-   */
-  void render(Skeleton skeleton);
-  /*
-   * render a single body part
-   */
-  void render(BodyPart bodyPart);
-}
-
-
 /////////////////////////////////////
 //
-// BASE INTERFACE
+// BASE 2D RENDERER (RECTANGLES AND TEXTURES)
 //
 //
 
@@ -32,12 +8,10 @@ public class BasicBodyPartRenderer implements BodyPartRenderer
 {
   private PGraphics renderer;
 
-
   public BasicBodyPartRenderer(PGraphics g)
   {
     renderer = g;
   }
-
 
   /*
    * render a full skeleton, part-by-part
@@ -78,9 +52,6 @@ public class BasicBodyPartRenderer implements BodyPartRenderer
       {
         hint(DISABLE_DEPTH_TEST);
       }
-      fill(255);
-      textSize(24);
-      text("w/h:"+w+"/"+h, 4, 24);
 
       if (tex != null)
       {

@@ -8,7 +8,7 @@
 
 import processing.opengl.*;
 import SimpleOpenNI.*;
-
+import toxi.geom.Vec2D;
 
 // images for body parts:
 PImage bodyTex, headTex, armTex, toparmTex, toplegTex, legTex;
@@ -56,8 +56,12 @@ boolean saveFrames = false;
 
 void setup()
 {
-  size(640, 480, OPENGL);  
+  println("start setup");
+  
+  size(640, 480, P3D);  
 
+  println("set size");
+  
   screenWidthToKinectWidthRatio = width/640.0f;
   screenHeightToKinectHeightRatio = height/480.0f;
 
@@ -80,9 +84,12 @@ void setup()
 
   // create body part factory for creating new body parts
   bodyPartFactory = BodyPartFactory.getInstance();
-  
+
   // this will draw body parts and skeletons (collections of body parts) to the screen
   bodyPartRenderer = new BasicBodyPartRenderer(this.g);
+  
+  // or try this renderer...
+  //bodyPartRenderer = new ParticleBodyPartRenderer(this.g);
 }
 
 
@@ -97,13 +104,13 @@ void setup()
 void buildSkeleton(Skeleton s)
 {
   println("BUILDING SKELETON!");
-  
-  
+
+
   // note - padding is represented as 4 numbers: LEFT, RIGHT, TOP, BOTTOM
 
   // BODY TRUNK (TORSO) - this is padded in pixels
 
-    bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_LEFT_HIP, BodyPart.TORSO)
+  bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_LEFT_HIP, BodyPart.TORSO)
     .setPadding(0.1, 0.1, 0.15, 0.2)
       .setTexture(bodyTex);
 
@@ -137,7 +144,7 @@ void buildSkeleton(Skeleton s)
   bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_HEAD, BodyPart.HEAD)
     .setPadding(0.06, 0.06, 0.1, 0.1)
       .setTexture(headTex)
-      .disableDepth(true);
+        .disableDepth(true);
 
   // UPPER LEFT LEG (THIGH)
   bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE, BodyPart.LEFT_LEG_UPPER)
@@ -209,7 +216,7 @@ void draw()
       BodyPart rightHand = rightHands.get(0);
       PVector handPos = rightHand.getJoint(SimpleOpenNI.SKEL_RIGHT_HAND);
     }
-    
+
     // these draw based on percentages (so they scale to the body parts)
     bodyPartRenderer.render( skel );
 
@@ -225,7 +232,7 @@ void draw()
   }
   // end of drawing skeleton stuff
 
-if (saveImage)  saveFrame("kinect"+year()+"-"+month()+"-"+day()+"_"+hour()+"."+minute()+"."+second()+".png");
+  if (saveImage)  saveFrame("kinect"+year()+"-"+month()+"-"+day()+"_"+hour()+"."+minute()+"."+second()+".png");
 }
 
 

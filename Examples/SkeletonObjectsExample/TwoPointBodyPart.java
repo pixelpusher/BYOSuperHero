@@ -5,8 +5,8 @@ import processing.core.PVector;
 
 public class TwoPointBodyPart extends BodyPart
 {
-  public PVector worldPoint1, screenPoint1;
-  public PVector worldPoint2, screenPoint2;
+  public PVector worldPoint1, screenPoint1, pworldPoint1, pscreenPoint1;
+  public PVector worldPoint2, screenPoint2, pworldPoint2, pscreenPoint2;
 
 
   private int joint1ID, joint2ID;
@@ -21,8 +21,14 @@ public class TwoPointBodyPart extends BodyPart
     worldPoint1 = new PVector();
     screenPoint1 = new PVector();
 
+    pworldPoint1 = new PVector();
+    pscreenPoint1 = new PVector();
+
     worldPoint2 = new PVector();
     screenPoint2 = new PVector();
+
+    pworldPoint2 = new PVector();
+    pscreenPoint2 = new PVector();
 
     offsetPercent = new PVector();
     offsetCalculated = new PVector();
@@ -45,8 +51,20 @@ public class TwoPointBodyPart extends BodyPart
       return screenPoint2;
   }
 
+  public PVector getPrevJoint(int type)
+  {
+    if (joint1ID == type)
+      return pscreenPoint1;
+    else
+      return pscreenPoint2;
+  }
+
+
   public BodyPart update()
   {
+    pscreenPoint1.set(screenPoint1);
+    pscreenPoint2.set(screenPoint2);
+
     // get joint positions in 3D world for the tracked limbs
     context.getJointPositionSkeleton(skeletonId, joint1ID, worldPoint1);
     context.getJointPositionSkeleton(skeletonId, joint2ID, worldPoint2);

@@ -10,6 +10,10 @@ public class FourPointBodyPart extends BodyPart
   public PVector worldPoint3, screenPoint3;
   public PVector worldPoint4, screenPoint4;
   
+  public PVector pworldPoint1, pscreenPoint1;
+  public PVector pworldPoint2, pscreenPoint2;
+  public PVector pworldPoint3, pscreenPoint3;
+  public PVector pworldPoint4, pscreenPoint4;
   
   private int joint1ID, joint2ID, joint3ID, joint4ID;
   
@@ -23,15 +27,27 @@ public class FourPointBodyPart extends BodyPart
     worldPoint1 = new PVector();
     screenPoint1 = new PVector();
 
+    pworldPoint1 = new PVector();
+    pscreenPoint1 = new PVector();
+
     worldPoint2 = new PVector();
     screenPoint2 = new PVector();
+
+    pworldPoint2 = new PVector();
+    pscreenPoint2 = new PVector();
 
     worldPoint3 = new PVector();
     screenPoint3 = new PVector();
 
+    pworldPoint3 = new PVector();
+    pscreenPoint3 = new PVector();
+
     worldPoint4 = new PVector();
     screenPoint4 = new PVector();
     
+    pworldPoint4 = new PVector();
+    pscreenPoint4 = new PVector();
+
     offsetPercent = new PVector();
     offsetCalculated = new PVector();
     
@@ -58,9 +74,24 @@ public class FourPointBodyPart extends BodyPart
     else return screenPoint4;
   }
 
+  public PVector getPrevJoint(int type)
+  {
+    if (joint1ID == type)
+      return pscreenPoint1;
+    else if (joint2ID == type)
+      return pscreenPoint2;
+    else if (joint3ID == type)
+      return pscreenPoint3;
+    else return pscreenPoint4;
+  }
   
   public BodyPart update()
   {
+      pscreenPoint1.set(screenPoint1);
+      pscreenPoint2.set(screenPoint2);
+      pscreenPoint3.set(screenPoint3);
+      pscreenPoint4.set(screenPoint4);
+      
     // get joint positions in 3D world for the tracked limbs
       context.getJointPositionSkeleton(skeletonId, joint1ID, worldPoint1);
       context.getJointPositionSkeleton(skeletonId, joint2ID, worldPoint2);
@@ -92,6 +123,11 @@ public class FourPointBodyPart extends BodyPart
   //
   public BodyPart update(float[] lag)
   {
+      pscreenPoint1.set(screenPoint1);
+      pscreenPoint2.set(screenPoint2);
+      pscreenPoint3.set(screenPoint3);
+      pscreenPoint4.set(screenPoint4);
+
     // get joint positions in 3D world for the tracked limbs
       context.getJointPositionSkeleton(skeletonId, joint1ID, worldPoint1);
       context.getJointPositionSkeleton(skeletonId, joint2ID, worldPoint2);
