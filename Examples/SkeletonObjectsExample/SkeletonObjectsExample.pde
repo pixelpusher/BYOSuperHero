@@ -57,7 +57,7 @@ void setup()
 {
   println("start setup");
   
-  size(640, 480, P3D);  
+  size(640, 480, OPENGL);  
 
   println("set size");
   
@@ -85,10 +85,10 @@ void setup()
   bodyPartFactory = BodyPartFactory.getInstance();
 
   // this will draw body parts and skeletons (collections of body parts) to the screen
-  bodyPartRenderer = new BasicBodyPartRenderer(this.g);
+  //bodyPartRenderer = new BasicBodyPartRenderer(this.g);
   
   // or try this renderer...
-  //bodyPartRenderer = new ParticleBodyPartRenderer(this.g);
+  bodyPartRenderer = new ParticleBodyPartRenderer(this.g);
 }
 
 
