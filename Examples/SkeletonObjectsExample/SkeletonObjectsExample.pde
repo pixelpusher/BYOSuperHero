@@ -8,7 +8,6 @@
 
 import processing.opengl.*;
 import SimpleOpenNI.*;
-import toxi.geom.Vec2D;
 
 // images for body parts:
 PImage bodyTex, headTex, armTex, toparmTex, toplegTex, legTex;

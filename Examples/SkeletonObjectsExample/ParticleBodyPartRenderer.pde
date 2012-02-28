@@ -6,7 +6,7 @@
 
 import processing.core.*;
 import java.util.ArrayList;
-
+import toxi.geom.Vec2D;
 
 public class ParticleBodyPartRenderer implements BodyPartRenderer
 {
