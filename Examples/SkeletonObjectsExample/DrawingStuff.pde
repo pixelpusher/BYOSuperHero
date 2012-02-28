@@ -1,31 +1,103 @@
-class BodyPartRenderer
-{
+//import core.processing.*;
 
-  void renderPart(BodyPart bodyPart)
+//
+// BASE INTERFACE
+//
+
+public interface BodyPartRenderer
+{
+  // public PGraphics renderer;
+
+  // public BodyPartRenderer(PGraphics g);
+
+
+  /*
+   * render a full skeleton, part-by-part
+   */
+  void render(Skeleton skeleton);
+  /*
+   * render a single body part
+   */
+  void render(BodyPart bodyPart);
+}
+
+
+/////////////////////////////////////
+//
+// BASE INTERFACE
+//
+//
+
+public class BasicBodyPartRenderer implements BodyPartRenderer
+{
+  private PGraphics renderer;
+
+
+  public BasicBodyPartRenderer(PGraphics g)
   {
-    pushMatrix();
-    translate(bodyPart.getScreenOffsetX(), bodyPart.getScreenOffsetY(), bodyPart.getScreenOffsetZ());
+    renderer = g;
+  }
+
+
+  /*
+   * render a full skeleton, part-by-part
+   */
+  void render(Skeleton skeleton)
+  {
+    if (skeleton.calibrated)  // first check if there is anything to draw!
+    {
+      // these draw based on percentages (so they scale to the body parts)
+      for (BodyPart bodyPart : skeleton.mBodyParts)
+      {
+        render( bodyPart );
+      }
+    }
+  }
+
+
+  /*
+   * render a single body part
+   */
+  void render(BodyPart bodyPart)
+  {
+    renderer.pushMatrix();
+    renderer.translate(bodyPart.getScreenOffsetX(), bodyPart.getScreenOffsetY(), bodyPart.getScreenOffsetZ());
 
     if (bodyPart instanceof OnePointBodyPart)
     {
       PImage tex = bodyPart.getTexture();
       OnePointBodyPart obp = (OnePointBodyPart)bodyPart;
-      
-      pushMatrix();
-      translate(obp.screenPoint1.x, obp.screenPoint1.y, obp.screenPoint1.z);  
-      float faceHeight = obp.screenPoint1.y-obp.screenPoint1.y;
+
+      renderer.pushMatrix();
+      renderer.translate(obp.screenPoint1.x, obp.screenPoint1.y, obp.screenPoint1.z);  
+
+      float w = renderer.width*(obp.getLeftPadding()+obp.getRightPadding());
+      float h = renderer.height*(obp.getTopPadding()+obp.getBottomPadding());
+
+      if (obp.depthDisabled)
+      {
+        hint(DISABLE_DEPTH_TEST);
+      }
+      fill(255);
+      textSize(24);
+      text("w/h:"+w+"/"+h, 4, 24);
 
       if (tex != null)
       {
-        imageMode(CENTER);    
-        image(headTex, 0, 0, faceHeight*0.66, faceHeight);
+        renderer.imageMode(CENTER);    
+        renderer.image(tex, 0, 0, w, h);
       }
       else
       {
-        rectMode(CENTER);    
-        rect(0, 0, faceHeight*0.66, faceHeight);
+        fill(255);
+        renderer.rectMode(CENTER);    
+        renderer.rect(0, 0, w, h);
       }
-      popMatrix();
+      if (obp.depthDisabled)
+      {
+        hint(ENABLE_DEPTH_TEST);
+      }
+      renderer.popMatrix();
     }
     else if (bodyPart instanceof TwoPointBodyPart)
     {      
@@ -36,13 +108,13 @@ class BodyPartRenderer
     else if (bodyPart instanceof FourPointBodyPart)
     {
       FourPointBodyPart fbp = (FourPointBodyPart)bodyPart;
-      
+
       renderRectFromVectors(fbp.screenPoint1, fbp.screenPoint2, fbp.screenPoint3, fbp.screenPoint4, 
       fbp.getLeftPadding(), fbp.getRightPadding(), fbp.getTopPadding(), fbp.getBottomPadding(), 
       fbp.getTexture(), fbp.getReversed() );
     }
 
-    popMatrix();
+    renderer.popMatrix();
   }
 
 
@@ -99,24 +171,24 @@ class BodyPartRenderer
     // height of the shape
     float h = sqrt( xdiff*xdiff + ydiff*ydiff) + lengthPadding*2.0f;
 
-    //ellipse(xCenter, yCenter, 10, 10);  
+    //renderer.ellipse(xCenter, yCenter, 10, 10);  
 
-    pushMatrix();
+    renderer.pushMatrix();
 
     // rotations are at 0,0 by default, but we want to rotate around the center
     // of this shape
-    translate(xCenter, yCenter);
+    renderer.translate(xCenter, yCenter);
     //ellipse(0, 0, 20, 20);
 
     // rotate
-    rotate(angle);
+    renderer.rotate(angle);
 
     // center screen
-    translate( -h*0.5f, -widthPadding/2);
+    renderer.translate( -h*0.5f, -widthPadding/2);
 
     renderRect(h, widthPadding, p1.z, p2.z, tex, reversed);
 
-    popMatrix();
+    renderer.popMatrix();
 
     // another way to do it...  
     // center screen
@@ -207,23 +279,23 @@ class BodyPartRenderer
     float totalHeight =  h + h*(padTop+padBottom);
 
     // save drawing state
-    pushMatrix();
+    renderer.pushMatrix();
 
     // rotations are at 0,0 by default, but we want to rotate around the center
     // of this shape
 
-    translate(xCenter, yCenter, (p1.z+p2.z)/2);
-    //ellipse(0, 0, 20, 20);
+    renderer.translate(xCenter, yCenter, (p1.z+p2.z)/2);
+    //renderer.ellipse(0, 0, 20, 20);
 
     // rotate
-    rotate(angle);
+    renderer.rotate(angle);
 
     // center screen
-    translate(-h*padTop-h*0.5f, -padLeft*h);
+    renderer.translate(-h*padTop-h*0.5f, -padLeft*h);
 
     renderRect(totalHeight, widthPadding, p1.z, p2.z, tex, reversed);
 
-    popMatrix();
+    renderer.popMatrix();
   }
 
 
@@ -237,34 +309,34 @@ class BodyPartRenderer
 
   void renderRect(float w, float h, PImage tex, boolean reversed)
   {
-    textureMode(NORMALIZED);
+    renderer.textureMode(NORMALIZED);
     int r = reversed ? 1 : 0;
-    
+
     // now draw rightside up
-    beginShape(TRIANGLES);
+    renderer.beginShape(TRIANGLES);
     if (tex != null)
     {
-      noStroke();
-      texture(tex);
-      vertex(0, 0, 1-r, 0);
-      vertex(w, 0, 1-r, 1);
-      vertex(w, h, r-0, 1);
+      renderer.noStroke();
+      renderer.texture(tex);
+      renderer.vertex(0, 0, 1-r, 0);
+      renderer.vertex(w, 0, 1-r, 1);
+      renderer.vertex(w, h, r-0, 1);
 
-      vertex(w, h, r-0, 1);
-      vertex(0, h, r-0, 0);
-      vertex(0, 0, 1-r, 0);
+      renderer.vertex(w, h, r-0, 1);
+      renderer.vertex(0, h, r-0, 0);
+      renderer.vertex(0, 0, 1-r, 0);
     }
     else
     {
-      vertex(0, 0);
-      vertex(w, 0);
-      vertex(w, h);
+      renderer.vertex(0, 0);
+      renderer.vertex(w, 0);
+      renderer.vertex(w, h);
 
-      vertex(w, h);
-      vertex(0, h);
-      vertex(0, 0);
+      renderer.vertex(w, h);
+      renderer.vertex(0, h);
+      renderer.vertex(0, 0);
     }
-    endShape(CLOSE);
+    renderer.endShape(CLOSE);
   }
 
 
@@ -272,34 +344,34 @@ class BodyPartRenderer
   void renderRect(float w, float h, float d1, float d2, PImage tex, boolean reversed)
   {
     int r = reversed ? 1 : 0;
-    
-    textureMode(NORMALIZED);
-  
+
+    renderer.textureMode(NORMALIZED);
+
     // now draw rightside up
-    beginShape(TRIANGLES);
+    renderer.beginShape(TRIANGLES);
     if (tex != null)
     {
-      noStroke();
-      texture(tex);
-      vertex(0, 0, d1, 1-r, 0);
-      vertex(w, 0, d1, 1-r, 1);
-      vertex(w, h, d2, r-0, 1);
+      renderer.noStroke();
+      renderer.texture(tex);
+      renderer.vertex(0, 0, d1, 1-r, 0);
+      renderer.vertex(w, 0, d1, 1-r, 1);
+      renderer.vertex(w, h, d2, r-0, 1);
 
-      vertex(w, h, d2, r-0, 1);
-      vertex(0, h, d2, r-0, 0);
-      vertex(0, 0, d1, 1-r, 0);
+      renderer.vertex(w, h, d2, r-0, 1);
+      renderer.vertex(0, h, d2, r-0, 0);
+      renderer.vertex(0, 0, d1, 1-r, 0);
     }
     else
     {
-      vertex(0, 0);
-      vertex(w, 0);
-      vertex(w, h);
+      renderer.vertex(0, 0);
+      renderer.vertex(w, 0);
+      renderer.vertex(w, h);
 
-      vertex(w, h);
-      vertex(0, h);
-      vertex(0, 0);
+      renderer.vertex(w, h);
+      renderer.vertex(0, h);
+      renderer.vertex(0, 0);
     }
-    endShape(CLOSE);
+    renderer.endShape(CLOSE);
   }
 
 
@@ -328,81 +400,81 @@ class BodyPartRenderer
     float pY1 = padY*(p4.y-p1.y);
     float pY2 = padY*(p3.y-p2.y);
 
-    beginShape(TRIANGLES);
+    renderer.beginShape(TRIANGLES);
     if (tex != null)
     {
-      noStroke();
-      texture(tex);
-      vertex(p1.x-pX1, p1.y-pY1, 0, 0);
-      vertex(p2.x+pX1, p2.y-pY2, 100, 0);
-      vertex(p3.x+pX2, p3.y+pY1, 100, 100);
+      renderer.noStroke();
+      renderer.texture(tex);
+      renderer.vertex(p1.x-pX1, p1.y-pY1, 0, 0);
+      renderer.vertex(p2.x+pX1, p2.y-pY2, 100, 0);
+      renderer.vertex(p3.x+pX2, p3.y+pY1, 100, 100);
 
-      vertex(p3.x+pX2, p3.y+pY1, 100, 100);
-      vertex(p4.x-pX2, p4.y+pY2, 0, 100);
-      vertex(p1.x-pX1, p1.y-pY1, 0, 0);
+      renderer.vertex(p3.x+pX2, p3.y+pY1, 100, 100);
+      renderer.vertex(p4.x-pX2, p4.y+pY2, 0, 100);
+      renderer.vertex(p1.x-pX1, p1.y-pY1, 0, 0);
     }
     else
     {
-      vertex(p1.x-pX1, p1.y-pY1);
-      vertex(p2.x+pX1, p2.y-pY2);
-      vertex(p3.x+pX2, p3.y+pY1);
+      renderer.vertex(p1.x-pX1, p1.y-pY1);
+      renderer.vertex(p2.x+pX1, p2.y-pY2);
+      renderer.vertex(p3.x+pX2, p3.y+pY1);
 
-      vertex(p3.x+pX2, p3.y+pY1);
-      vertex(p4.x-pX2, p4.y+pY2);
-      vertex(p1.x-pX1, p1.y-pY1);
+      renderer.vertex(p3.x+pX2, p3.y+pY1);
+      renderer.vertex(p4.x-pX2, p4.y+pY2);
+      renderer.vertex(p1.x-pX1, p1.y-pY1);
     }
-    endShape();
+    renderer.endShape();
   }
 
 
-//
+  //
   // Render a clockwise list of vectors as a (optionally) textured rectangle with padding  
   //
   void renderRectFromVectors(PVector p1, PVector p2, PVector p3, PVector p4, float padL, float padR, float padT, float padB, PImage tex, boolean reversed)
   {
     float WT = p2.x-p1.x;
     float WB = p3.x-p4.x;
-    
+
     float padWidthLT = padL*WT;
     float padWidthLB = padL*WB;
 
     float padWidthRT = padR*WT;
     float padWidthRB = padR*WB;
-    
+
 
     float HL = p4.y-p1.y;
     float HR = p3.y-p2.y;
-    
+
     float padHeightTL = padT*HL;
     float padHeightTR = padT*HR;
-    
+
     float padHeightBL = padB*HL;
     float padHeightBR = padB*HR;
-    
-    beginShape(TRIANGLES);
+
+    renderer.beginShape(TRIANGLES);
     if (tex != null)
     {
-      noStroke();
-      texture(tex);
-      vertex(p1.x-padWidthLT, p1.y-padHeightTL, 0, 0);
-      vertex(p2.x+padWidthRT, p2.y-padHeightTR, 100, 0);
-      vertex(p3.x+padWidthRB, p3.y+padHeightBR, 100, 100);
+      renderer.noStroke();
+      renderer.texture(tex);
+      renderer.vertex(p1.x-padWidthLT, p1.y-padHeightTL, 0, 0);
+      renderer.vertex(p2.x+padWidthRT, p2.y-padHeightTR, 100, 0);
+      renderer.vertex(p3.x+padWidthRB, p3.y+padHeightBR, 100, 100);
 
-      vertex(p3.x+padWidthRB, p3.y+padHeightBR, 100, 100);
-      vertex(p4.x-padWidthLB, p4.y+padHeightBL, 0, 100);
-      vertex(p1.x-padWidthLT, p1.y-padHeightTL, 0, 0);
+      renderer.vertex(p3.x+padWidthRB, p3.y+padHeightBR, 100, 100);
+      renderer.vertex(p4.x-padWidthLB, p4.y+padHeightBL, 0, 100);
+      renderer.vertex(p1.x-padWidthLT, p1.y-padHeightTL, 0, 0);
     }
     else
     {
-      vertex(p1.x-padWidthLT, p1.y-padHeightTL);
-      vertex(p2.x+padWidthRT, p2.y-padHeightTR);
-      vertex(p3.x+padWidthRB, p3.y+padHeightBR);
+      renderer.vertex(p1.x-padWidthLT, p1.y-padHeightTL);
+      renderer.vertex(p2.x+padWidthRT, p2.y-padHeightTR);
+      renderer.vertex(p3.x+padWidthRB, p3.y+padHeightBR);
 
-      vertex(p3.x+padWidthRB, p3.y+padHeightBR);
-      vertex(p4.x-padWidthLB, p4.y+padHeightBL);
-      vertex(p1.x-padWidthLT, p1.y-padHeightTL);
+      renderer.vertex(p3.x+padWidthRB, p3.y+padHeightBR);
+      renderer.vertex(p4.x-padWidthLB, p4.y+padHeightBL);
+      renderer.vertex(p1.x-padWidthLT, p1.y-padHeightTL);
     }
-    endShape();
+    renderer.endShape();
   }
 
 
@@ -434,30 +506,30 @@ class BodyPartRenderer
     float pY1 = padYTop;
     float pY2 = padYBottom;
 
-    beginShape(TRIANGLES);
+    renderer.beginShape(TRIANGLES);
     if (tex != null)
     {
-      noStroke();
-      texture(tex);    
-      vertex(p1.x-pX1, p1.y-pY1, p1.z, 0, 0);
-      vertex(p2.x+pX1, p2.y-pY1, p2.z, 100, 0);
-      vertex(p3.x+pX2, p3.y+pY2, p3.z, 100, 100);
+      renderer.noStroke();
+      renderer.texture(tex);    
+      renderer.vertex(p1.x-pX1, p1.y-pY1, p1.z, 0, 0);
+      renderer.vertex(p2.x+pX1, p2.y-pY1, p2.z, 100, 0);
+      renderer.vertex(p3.x+pX2, p3.y+pY2, p3.z, 100, 100);
 
-      vertex(p3.x+pX2, p3.y+pY2, p3.z, 100, 100);
-      vertex(p4.x-pX2, p4.y+pY2, p4.z, 0, 100);
-      vertex(p1.x-pX1, p1.y-pY1, p1.z, 0, 0);
+      renderer.vertex(p3.x+pX2, p3.y+pY2, p3.z, 100, 100);
+      renderer.vertex(p4.x-pX2, p4.y+pY2, p4.z, 0, 100);
+      renderer.vertex(p1.x-pX1, p1.y-pY1, p1.z, 0, 0);
     }
     else
     {
-      vertex(p1.x-pX1, p1.y-pY1, p1.z);
-      vertex(p2.x+pX1, p2.y-pY1, p2.z);
-      vertex(p3.x+pX2, p3.y+pY2, p3.z);
+      renderer.vertex(p1.x-pX1, p1.y-pY1, p1.z);
+      renderer.vertex(p2.x+pX1, p2.y-pY1, p2.z);
+      renderer.vertex(p3.x+pX2, p3.y+pY2, p3.z);
 
-      vertex(p3.x+pX2, p3.y+pY2, p3.z);
-      vertex(p4.x-pX2, p4.y+pY2, p4.z);
-      vertex(p1.x-pX1, p1.y-pY1, p1.z);
+      renderer.vertex(p3.x+pX2, p3.y+pY2, p3.z);
+      renderer.vertex(p4.x-pX2, p4.y+pY2, p4.z);
+      renderer.vertex(p1.x-pX1, p1.y-pY1, p1.z);
     }
-    endShape();
+    renderer.endShape();
   }
 
   // end class BodyPartRenderer

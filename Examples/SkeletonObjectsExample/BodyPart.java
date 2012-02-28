@@ -34,7 +34,8 @@ public abstract class BodyPart
   protected PImage tex;
   protected float padR, padL, padT, padB;
   public boolean reversed;
-
+  public boolean depthDisabled;
+  
   protected SimpleOpenNI context;
   protected int skeletonId;
   protected int type;
@@ -55,6 +56,14 @@ public abstract class BodyPart
    */
   public abstract BodyPart update();
 
+  /*
+   * This must be overridden by subclasses that actually implement this
+   * Uses lerp() or some other method to give a bit of lag to the new movement
+   * for each body part's joint point
+   */
+  public abstract BodyPart update(float[] lag); 
+
+  public abstract PVector getJoint(int type); 
 
   /*
    * Useful for getting the screen depth for a given world depth
@@ -87,7 +96,8 @@ public abstract class BodyPart
     return skeletonId;
   }
 
-
+  // TODO: should this be an enum?? -Evan
+  //
   public BodyPart setType(int _type) throws BodyPartTypeNotValidException
   {
     if (BodyPart.checkTypeIsValid(_type))
@@ -204,7 +214,17 @@ public abstract class BodyPart
     return reversed;
   }
 
+  public BodyPart disableDepth(boolean r) // Skeleton part id form SimpleOpenNI
+  {
+    depthDisabled = r;      
+    return this;
+  }
 
+  public boolean getDepthDisabled() // Skeleton part id form SimpleOpenNI
+  {
+    return depthDisabled;
+  }
+  
   public BodyPart setTexture(PImage _tex)
   {
     tex = _tex;

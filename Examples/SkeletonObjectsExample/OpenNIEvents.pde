@@ -128,7 +128,10 @@ void onEndCalibration(int userId, boolean successful)
 
       // set as current skeleton    
       if (successful)
+      {
         currentSkeleton = s;
+        buildSkeleton(currentSkeleton);
+      }
 
       break;
     }

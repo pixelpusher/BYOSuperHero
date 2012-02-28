@@ -49,7 +49,7 @@ public class BodyPartFactory
   public static BodyPart createPartForSkeleton(Skeleton skeleton, int part1ID, int type)
   {
     BodyPart bp = makeBodyPart(part1ID, type).setSkeletonId(skeleton.id).setContext(skeleton.context);
-    skeleton.bodyParts.add(bp);
+    skeleton.addBodyPart(bp);
 
     return bp;
   }
@@ -57,7 +57,7 @@ public class BodyPartFactory
   public static BodyPart createPartForSkeleton(Skeleton skeleton, int part1ID, int part2ID, int type)
   {
     BodyPart bp = makeBodyPart(part1ID, part2ID, type).setSkeletonId(skeleton.id).setContext(skeleton.context);
-    skeleton.bodyParts.add(bp);
+    skeleton.addBodyPart(bp);
 
     return bp;
   }
@@ -66,7 +66,7 @@ public class BodyPartFactory
   public static BodyPart createPartForSkeleton(Skeleton skeleton, int part1ID, int part2ID, int part3ID, int part4ID, int type)
   {
     BodyPart bp = makeBodyPart(part1ID, part2ID, part3ID, part4ID, type).setSkeletonId(skeleton.id).setContext(skeleton.context);
-    skeleton.bodyParts.add(bp);
+    skeleton.addBodyPart(bp);
 
     return bp;
   }

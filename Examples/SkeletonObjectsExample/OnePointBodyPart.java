@@ -31,6 +31,12 @@ public class OnePointBodyPart extends BodyPart
   }
   
   
+  public PVector getJoint(int type)
+  {
+      return screenPoint1;
+  }
+
+
   public BodyPart update()
   {
     // get joint positions in 3D world for the tracked limbs
@@ -47,5 +53,20 @@ public class OnePointBodyPart extends BodyPart
       return this;
   }
       
+  public BodyPart update(float[] lag)
+  {
+   // get joint positions in 3D world for the tracked limbs
+      context.getJointPositionSkeleton(skeletonId, joint1ID, worldPoint1);
+
+      context.convertRealWorldToProjective(worldPoint1, screenPoint1);
+      screenPoint1.z = worldDepthToScreen(screenPoint1.z);
+      
+      // now calculate offsets in screen coords
+      offsetCalculated.x = lag[0]*offsetCalculated.x + (1f-lag[0])*offsetPercent.x*screenPoint1.x;
+      offsetCalculated.y = lag[0]*offsetCalculated.y + (1f-lag[0])*offsetPercent.y*screenPoint1.y;
+      offsetCalculated.z = lag[0]*offsetCalculated.z + (1f-lag[0])*offsetPercent.z*screenPoint1.z;
+      
+      return this;
+  }
 }
 

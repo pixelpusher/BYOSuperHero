@@ -78,8 +78,11 @@ void setup()
   // enable skeleton generation for all joints
   context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);
 
-
+  // create body part factory for creating new body parts
   bodyPartFactory = BodyPartFactory.getInstance();
+  
+  // this will draw body parts and skeletons (collections of body parts) to the screen
+  bodyPartRenderer = new BasicBodyPartRenderer(this.g);
 }
 
 
@@ -93,6 +96,9 @@ void setup()
 
 void buildSkeleton(Skeleton s)
 {
+  println("BUILDING SKELETON!");
+  
+  
   // note - padding is represented as 4 numbers: LEFT, RIGHT, TOP, BOTTOM
 
   // BODY TRUNK (TORSO) - this is padded in pixels
@@ -129,8 +135,9 @@ void buildSkeleton(Skeleton s)
 
   //HEAD
   bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_HEAD, BodyPart.HEAD)
-    .setPadding(0.1, 0.1, 0.0, 0.0)
-      .setTexture(headTex);
+    .setPadding(0.06, 0.06, 0.1, 0.1)
+      .setTexture(headTex)
+      .disableDepth(true);
 
   // UPPER LEFT LEG (THIGH)
   bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE, BodyPart.LEFT_LEG_UPPER)
@@ -185,17 +192,27 @@ void draw()
   //  if (currentSkeleton != null)
 
 
-  // draw all our skeletons
+  // Update all our skeletons with current data form Kinect, and
+  // draw them.
+  //
   for (Skeleton skel : skeletons)
   { 
-    // update skeleton joints coordinates
+    // update skeleton joints coordinates using current Kinect data
     skel.update();
 
-    // these draw based on percentages (so they scale to the body parts)
-    for (BodyPart bodyPart : skel.bodyParts)
+    // get a reference to the right hand - should only be one for this example, but
+    // there could be more if we built our skeleton differently
+    //
+    ArrayList<BodyPart> rightHands = skel.getPartsByType(BodyPart.RIGHT_ARM_LOWER);
+    if ( rightHands.size() > 0 )
     {
-      bodyPartRenderer.renderPart( bodyPart );
+      BodyPart rightHand = rightHands.get(0);
+      PVector handPos = rightHand.getJoint(SimpleOpenNI.SKEL_RIGHT_HAND);
     }
+    
+    // these draw based on percentages (so they scale to the body parts)
+    bodyPartRenderer.render( skel );
+
 
     // save frame image if necessary
     if (saveFrames && (millis()-lastSaveTime) > 2000)

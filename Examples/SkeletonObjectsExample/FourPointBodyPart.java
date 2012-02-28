@@ -47,6 +47,18 @@ public class FourPointBodyPart extends BodyPart
   }
   
   
+  public PVector getJoint(int type)
+  {
+    if (joint1ID == type)
+      return screenPoint1;
+    else if (joint2ID == type)
+      return screenPoint2;
+    else if (joint3ID == type)
+      return screenPoint3;
+    else return screenPoint4;
+  }
+
+  
   public BodyPart update()
   {
     // get joint positions in 3D world for the tracked limbs
@@ -74,6 +86,36 @@ public class FourPointBodyPart extends BodyPart
       
       return this;
   }
+  
+  //
+  // TODO: make this real
+  //
+  public BodyPart update(float[] lag)
+  {
+    // get joint positions in 3D world for the tracked limbs
+      context.getJointPositionSkeleton(skeletonId, joint1ID, worldPoint1);
+      context.getJointPositionSkeleton(skeletonId, joint2ID, worldPoint2);
+      context.getJointPositionSkeleton(skeletonId, joint3ID, worldPoint3);      
+      context.getJointPositionSkeleton(skeletonId, joint4ID, worldPoint4);
+
+      context.convertRealWorldToProjective(worldPoint1, screenPoint1);
+      screenPoint1.z = worldDepthToScreen(screenPoint1.z);
       
+      context.convertRealWorldToProjective(worldPoint2, screenPoint2);
+      screenPoint2.z = worldDepthToScreen(screenPoint2.z);
+
+      context.convertRealWorldToProjective(worldPoint3, screenPoint3);
+      screenPoint3.z = worldDepthToScreen(screenPoint3.z);
+
+      context.convertRealWorldToProjective(worldPoint4, screenPoint4);
+      screenPoint4.z = worldDepthToScreen(screenPoint4.z);
+      
+      // now calculate offsets in screen coords
+      offsetCalculated.x = offsetPercent.x*(screenPoint1.x+screenPoint2.x)*0.5f;
+      offsetCalculated.y = offsetPercent.y*(screenPoint1.y+screenPoint4.y)*0.5f;
+      offsetCalculated.z = offsetPercent.z*(screenPoint1.z+screenPoint4.z)*0.5f;
+      
+      return this;
+  }
 }
 
