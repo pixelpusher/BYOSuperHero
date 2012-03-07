@@ -7,10 +7,27 @@
 public class BasicBodyPartRenderer implements BodyPartRenderer
 {
   private PGraphics renderer;
+  private Skeleton skeleton; 
 
   public BasicBodyPartRenderer(PGraphics g)
   {
     renderer = g;
+    skeleton = null;
+  }
+
+  public void setRenderer(PGraphics g)
+  {
+      renderer = g;
+  }
+  
+  public void setSkeleton(Skeleton s)
+  {
+    skeleton = s;
+  }   
+
+  public void render()
+  {
+    render(skeleton);
   }
 
   /*
@@ -18,7 +35,7 @@ public class BasicBodyPartRenderer implements BodyPartRenderer
    */
   void render(Skeleton skeleton)
   {
-    if (skeleton.calibrated)  // first check if there is anything to draw!
+    if (skeleton != null && skeleton.calibrated)  // first check if there is anything to draw!
     {
       // these draw based on percentages (so they scale to the body parts)
       for (BodyPart bodyPart : skeleton.mBodyParts)

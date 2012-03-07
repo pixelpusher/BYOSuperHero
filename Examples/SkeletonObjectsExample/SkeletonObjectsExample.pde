@@ -8,6 +8,7 @@
 
 import processing.opengl.*;
 import SimpleOpenNI.*;
+import controlP5.*;
 
 // images for body parts:
 PImage bodyTex, headTex, armTex, toparmTex, toplegTex, legTex;
@@ -48,6 +49,8 @@ int lastSaveTime = 0;
 boolean drawDepthImage = true;
 boolean saveFrames = false;
 
+ControlP5 gui;
+
 
 ///////////////////////////////////////////
 // SETUP
@@ -58,6 +61,12 @@ void setup()
   println("start setup");
   
   size(640, 480, OPENGL);  
+
+  gui = new ControlP5(this);
+
+  gui.addSlider("boneDistFactor", 0.001, 1, 5, 5, 100, 20);
+  gui.addSlider("particleMassAttractFactor", 0.1, 40, 5, 25, 100, 20);
+  gui.addSlider("boneMinDist", 10*10, 200*200, 5, 45, 300, 20);
 
   println("set size");
   
@@ -112,6 +121,11 @@ void buildSkeleton(Skeleton s)
   bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_LEFT_HIP, BodyPart.TORSO)
     .setPadding(0.1, 0.1, 0.15, 0.2)
       .setTexture(bodyTex);
+
+  // PELVIS
+  bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_RIGHT_HIP, BodyPart.PELVIS)
+    .setPadding(0.1, 0.1, 0.2, 0.2)
+      .setTexture(null);
 
   //UPPER LEFT ARM
   bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW, BodyPart.LEFT_ARM_UPPER)

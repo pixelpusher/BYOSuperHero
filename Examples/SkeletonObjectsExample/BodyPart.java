@@ -30,6 +30,7 @@ public abstract class BodyPart
   static int LEFT_LEG_LOWER = 8;
   static int RIGHT_LEG_UPPER = 9;
   static int RIGHT_LEG_LOWER = 10;
+  static int PELVIS = 11;
 
   protected PImage tex;
   protected float padR, padL, padT, padB;
@@ -69,11 +70,11 @@ public abstract class BodyPart
   /*
    * Useful for getting the screen depth for a given world depth
    */
-  static float worldDepthToScreen(float z)
+  float worldDepthToScreen(float z)
   {
-    return (Math.abs(z) < 1E-5) ? 0f : 525.0f/z;
+    // base depth on the width of the context
+    return context.depthImage().width*(Math.abs(z) < 1E-5) ? 0f : 525.0f/z;
   }
-
 
   public BodyPart setContext(SimpleOpenNI _context)
   {
