@@ -26,8 +26,10 @@ ArrayList<Skeleton> skeletons = new ArrayList<Skeleton>();
 // shortcut to the current skeleton we want to draw
 Skeleton currentSkeleton = null;
 
-// this draws body parts to the screen
+// this is a reference to the part that draws body parts to the screen
 BodyPartRenderer bodyPartRenderer;
+// these are the actual renderers
+BodyPartRenderer bodyPart2DRenderer, bodyPartParticleRenderer;
 
 // this contains methods for creating new body parts and adding them to skeletons (to keep track of)
 BodyPartFactory bodyPartFactory;
@@ -59,7 +61,7 @@ ControlP5 gui;
 void setup()
 {
   println("start setup");
-  
+
   size(640, 480, OPENGL);  
 
   gui = new ControlP5(this);
@@ -69,7 +71,7 @@ void setup()
   gui.addSlider("boneMinDist", 10*10, 200*200, 5, 45, 300, 20);
 
   println("set size");
-  
+
   screenWidthToKinectWidthRatio = width/640.0f;
   screenHeightToKinectHeightRatio = height/480.0f;
 
@@ -95,9 +97,11 @@ void setup()
 
   // this will draw body parts and skeletons (collections of body parts) to the screen
   //bodyPartRenderer = new BasicBodyPartRenderer(this.g);
-  
+
   // or try this renderer...
-  bodyPartRenderer = new ParticleBodyPartRenderer(this.g);
+  bodyPartParticleRenderer = new ParticleBodyPartRenderer(this.g);
+
+  bodyPartRenderer = bodyPart2DRenderer= new BasicBodyPartRenderer(this.g);
 }
 
 
@@ -123,9 +127,9 @@ void buildSkeleton(Skeleton s)
       .setTexture(bodyTex);
 
   // PELVIS
-  bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_RIGHT_HIP, BodyPart.PELVIS)
-    .setPadding(0.1, 0.1, 0.2, 0.2)
-      .setTexture(null);
+//  bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_RIGHT_HIP, BodyPart.PELVIS)
+//    .setPadding(0.1, 0.1, 0.2, 0.2)
+//      .setTexture(null);
 
   //UPPER LEFT ARM
   bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW, BodyPart.LEFT_ARM_UPPER)
@@ -223,12 +227,12 @@ void draw()
     // get a reference to the right hand - should only be one for this example, but
     // there could be more if we built our skeleton differently
     //
-    ArrayList<BodyPart> rightHands = skel.getPartsByType(BodyPart.RIGHT_ARM_LOWER);
-    if ( rightHands.size() > 0 )
-    {
-      BodyPart rightHand = rightHands.get(0);
-      PVector handPos = rightHand.getJoint(SimpleOpenNI.SKEL_RIGHT_HAND);
-    }
+//    ArrayList<BodyPart> rightHands = skel.getPartsByType(BodyPart.RIGHT_ARM_LOWER);
+//    if ( rightHands.size() > 0 )
+//    {
+//      BodyPart rightHand = rightHands.get(0);
+//      PVector handPos = rightHand.getJoint(SimpleOpenNI.SKEL_RIGHT_HAND);
+//    }
 
     // these draw based on percentages (so they scale to the body parts)
     bodyPartRenderer.render( skel );
@@ -257,6 +261,13 @@ void keyReleased()
 {
   switch(key)
   {
+  case 'r':
+    if (bodyPartRenderer == bodyPartParticleRenderer)
+      bodyPartRenderer = bodyPart2DRenderer;
+    else
+      bodyPartRenderer = bodyPartParticleRenderer;
+    break;
+
   case 'd': 
     drawDepthImage = true;
     break;  

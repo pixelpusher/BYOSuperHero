@@ -7,12 +7,12 @@
 public class BasicBodyPartRenderer implements BodyPartRenderer
 {
   private PGraphics renderer;
-  private Skeleton skeleton; 
+  private Skeleton mSkeleton;
 
   public BasicBodyPartRenderer(PGraphics g)
   {
     renderer = g;
-    skeleton = null;
+    mSkeleton = null;
   }
 
   public void setRenderer(PGraphics g)
@@ -22,12 +22,12 @@ public class BasicBodyPartRenderer implements BodyPartRenderer
   
   public void setSkeleton(Skeleton s)
   {
-    skeleton = s;
+    mSkeleton = s;
   }   
 
   public void render()
   {
-    render(skeleton);
+    render(mSkeleton);
   }
 
   /*

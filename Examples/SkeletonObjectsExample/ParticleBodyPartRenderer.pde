@@ -26,15 +26,15 @@ public class JointLine
 public class ParticleBodyPartRenderer implements BodyPartRenderer
 {
   private PGraphics renderer;
-  private Skeleton skeleton;
+  private Skeleton mSkeleton;
 
   ArrayList<Particle> particles = new ArrayList<Particle>();
   float D;             // base diameter of all particles
   float mass = 0.2f;    // universal mass of all particles
   float DIST = 80*80;  // min distance for forces to act on
-  float MIN_DIST = 20; // min dist between mouse positions for adding new particles
+  float MIN_DIST = 30; // min dist between mouse positions for adding new particles
   boolean drawLines = true;  // draw lines btw particles?
-  int MAX_PARTICLES = 400;
+  int MAX_PARTICLES = 200;
 
   private ArrayList<PVector> allJointPositions;
   private ArrayList<JointLine> allJointLines;
@@ -51,7 +51,7 @@ public class ParticleBodyPartRenderer implements BodyPartRenderer
     allJointPositions = new ArrayList<PVector>();
     allJointLines = new ArrayList<JointLine>();
 
-    skeleton = null;
+    mSkeleton = null;
   }
 
   public void setRenderer(PGraphics g)
@@ -61,12 +61,12 @@ public class ParticleBodyPartRenderer implements BodyPartRenderer
 
   public void setSkeleton(Skeleton s)
   {
-    skeleton = s;
+    mSkeleton = s;
   }   
 
   public void render()
   {
-    render(skeleton);
+    render(mSkeleton);
   }
 
 
