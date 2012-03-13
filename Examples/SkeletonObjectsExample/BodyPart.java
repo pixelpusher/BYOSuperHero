@@ -73,8 +73,8 @@ public abstract class BodyPart
   float worldDepthToScreen(float z)
   {
     // base depth on the width of the context
-    //return context.depthImage().width * ((Math.abs(z) < 1E-5) ? 0f : 525.0f/z);
-    return (Math.abs(z) < 1E-5) ? 0f : 525.0f/z;
+    return context.depthImage().width * ((Math.abs(z) < 1E-5) ? 0f : 525.0f/z);
+    //return (Math.abs(z) < 1E-5) ? 0f : 525.0f/z;
   }
 
   public BodyPart setContext(SimpleOpenNI _context)

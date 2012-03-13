@@ -272,7 +272,7 @@ public class BasicBodyPartRenderer implements BodyPartRenderer
     // rotations are at 0,0 by default, but we want to rotate around the center
     // of this shape
 
-    renderer.translate(xCenter, yCenter, (p1.z+p2.z)/2);
+    renderer.translate(xCenter, yCenter);
     //renderer.ellipse(0, 0, 20, 20);
 
     // rotate
@@ -444,13 +444,13 @@ public class BasicBodyPartRenderer implements BodyPartRenderer
     {
       renderer.noStroke();
       renderer.texture(tex);
-      renderer.vertex(p1.x-padWidthLT, p1.y-padHeightTL, 0, 0);
-      renderer.vertex(p2.x+padWidthRT, p2.y-padHeightTR, 100, 0);
-      renderer.vertex(p3.x+padWidthRB, p3.y+padHeightBR, 100, 100);
+      renderer.vertex(p1.x-padWidthLT, p1.y-padHeightTL, p1.z, 0, 0);
+      renderer.vertex(p2.x+padWidthRT, p2.y-padHeightTR, p2.z, 100, 0);
+      renderer.vertex(p3.x+padWidthRB, p3.y+padHeightBR, p3.z, 100, 100);
 
-      renderer.vertex(p3.x+padWidthRB, p3.y+padHeightBR, 100, 100);
-      renderer.vertex(p4.x-padWidthLB, p4.y+padHeightBL, 0, 100);
-      renderer.vertex(p1.x-padWidthLT, p1.y-padHeightTL, 0, 0);
+      renderer.vertex(p3.x+padWidthRB, p3.y+padHeightBR, p3.z, 100, 100);
+      renderer.vertex(p4.x-padWidthLB, p4.y+padHeightBL, p4.z, 0, 100);
+      renderer.vertex(p1.x-padWidthLT, p1.y-padHeightTL, p1.z, 0, 0);
     }
     else
     {
