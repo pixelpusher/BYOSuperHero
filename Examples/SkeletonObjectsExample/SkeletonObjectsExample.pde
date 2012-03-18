@@ -181,7 +181,7 @@ void buildSkeleton(Skeleton s)
   bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_HEAD, BodyPart.HEAD)
     .setPadding(0.06, 0.06, 0.1, 0.1)
       .setTexture(headTex)
-        .disableDepth(true);
+        .disableDepth(false);
 
   // UPPER LEFT LEG (THIGH)
   bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE, BodyPart.LEFT_LEG_UPPER)
