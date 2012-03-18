@@ -4,22 +4,40 @@
 //
 //
 
-public class BasicBodyPartRenderer implements BodyPartRenderer
+import toxi.geom.*;
+import toxi.geom.mesh.*;
+import toxi.processing.*;
+
+
+public class BoxRenderer implements BodyPartRenderer
 {
   private PGraphics renderer;
   private Skeleton mSkeleton;
+  private PApplet app;
 
-  public BasicBodyPartRenderer(PGraphics g)
+  public ToxiclibsSupport gfx;
+
+  TriangleMesh origMesh, mesh;
+
+  public void initRenderer(PApplet _app)
+  {
+    app = _app;
+    gfx=new ToxiclibsSupport(app);
+    mSkeleton = null;
+    origMesh =(TriangleMesh)new AABB(new Vec3D(), 1).toMesh();
+    origMesh.transform(new Matrix4x4().translateSelf(0, 0, 1));
+  }
+
+  public BoxRenderer(PGraphics g)
   {
     renderer = g;
-    mSkeleton = null;
   }
 
   public void setRenderer(PGraphics g)
   {
-      renderer = g;
+    renderer = g;
   }
-  
+
   public void setSkeleton(Skeleton s)
   {
     mSkeleton = s;
@@ -54,50 +72,60 @@ public class BasicBodyPartRenderer implements BodyPartRenderer
     renderer.pushMatrix();
     renderer.translate(bodyPart.getScreenOffsetX(), bodyPart.getScreenOffsetY(), bodyPart.getScreenOffsetZ());
 
+
     if (bodyPart instanceof OnePointBodyPart)
     {
       PImage tex = bodyPart.getTexture();
       OnePointBodyPart obp = (OnePointBodyPart)bodyPart;
 
-      renderer.pushMatrix();
-      renderer.translate(obp.screenPoint1.x, obp.screenPoint1.y, obp.screenPoint1.z);  
+      Vec3D p1 = new Vec3D(obp.screenPoint1.x, obp.screenPoint1.y, obp.screenPoint1.z);
 
-      float w = renderer.width*(obp.getLeftPadding()+obp.getRightPadding());
-      float h = renderer.height*(obp.getTopPadding()+obp.getBottomPadding());
+      renderer.pushMatrix();
+      gfx.setGraphics(renderer);
 
       if (obp.depthDisabled)
       {
         hint(DISABLE_DEPTH_TEST);
       }
 
-      if (tex != null)
-      {
-        renderer.imageMode(CENTER);    
-        renderer.image(tex, 0, 0, w, h);
-      }
-      else
-      {
-        fill(255);
-        renderer.rectMode(CENTER);    
-        renderer.rect(0, 0, w, h);
-      }
+
+      // scale properly
+      Vec3D meshScale = new Vec3D(10, 10, 10);
+
+      float w = renderer.width*(obp.getLeftPadding()+obp.getRightPadding());
+      float h = renderer.height*(obp.getTopPadding()+obp.getBottomPadding());
+
+      // scale from point to point
+      mesh = origMesh.getScaled(new Vec3D(w, h, h));
+
+      gfx.translate(p1);
+      gfx.mesh(mesh, false, 10);
+
+
+      //      if (tex != null)
+      //      {
+      //      }
+      //      else
+      //      {
+      //      }
       if (obp.depthDisabled)
       {
         hint(ENABLE_DEPTH_TEST);
       }
       renderer.popMatrix();
     }
+
     else if (bodyPart instanceof TwoPointBodyPart)
     {      
       TwoPointBodyPart tbp = (TwoPointBodyPart)bodyPart;
-      renderRectFromVectors(tbp.screenPoint1, tbp.screenPoint2, tbp.getLeftPadding(), tbp.getRightPadding(), 
+      renderMeshFromVectors(tbp.screenPoint1, tbp.screenPoint2, tbp.getLeftPadding(), tbp.getRightPadding(), 
       tbp.getTopPadding(), tbp.getBottomPadding(), tbp.getTexture(), tbp.getReversed() );
     }
     else if (bodyPart instanceof FourPointBodyPart)
     {
       FourPointBodyPart fbp = (FourPointBodyPart)bodyPart;
 
-      renderRectFromVectors(fbp.screenPoint1, fbp.screenPoint2, fbp.screenPoint3, fbp.screenPoint4, 
+      renderMeshFromVectors(fbp.screenPoint1, fbp.screenPoint2, fbp.screenPoint3, fbp.screenPoint4, 
       fbp.getLeftPadding(), fbp.getRightPadding(), fbp.getTopPadding(), fbp.getBottomPadding(), 
       fbp.getTexture(), fbp.getReversed() );
     }
@@ -105,146 +133,81 @@ public class BasicBodyPartRenderer implements BodyPartRenderer
     renderer.popMatrix();
   }
 
-
-  // simple, no texture
-  void renderRectFromVectors(PVector p1, PVector p2, int widthPadding)
+  // utility function to make typing easier
+  Vec3D Vec3DFromPVector(PVector v)
   {
-    renderRectFromVectors(p1, p2, widthPadding, 0, null, false);
+    Vec3D v3d = new Vec3D(v.x, v.y, v.z);
+    return v3d;
   }
 
 
-  // simple, with texture
-  void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, PImage tex )
+  void  renderMeshFromVectors(PVector screenPoint1, PVector screenPoint2, float leftPadding, float rightPadding, 
+    float topPadding, float bottomPadding, PImage tex, boolean reversed)
   {
-    renderRectFromVectors(p1, p2, widthPadding, 0, tex, false);
+    Vec3D p1 = Vec3DFromPVector(screenPoint1);
+    Vec3D p2 = Vec3DFromPVector(screenPoint2);
+    
+    float diff = p2.distanceTo(p1)/2;
+    float scaleX = diff*(leftPadding+rightPadding);
+    float scaleY = diff*(topPadding+bottomPadding);
+    
+    //Vec3D meshScale = Vec3D(diff*(leftPadding+rightPadding), diff*(topPadding+bottomPadding), diff);
+    drawMeshBetween(p1, p2, scaleX, scaleY, origMesh, renderer);
+    
   }
 
-  // simple, with texture
-  void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, PImage tex, boolean reversed )
+void  renderMeshFromVectors(PVector screenPoint1, PVector screenPoint2, PVector screenPoint3, PVector screenPoint4, float leftPadding, float rightPadding, 
+    float topPadding, float bottomPadding, PImage tex, boolean reversed)
   {
-    renderRectFromVectors(p1, p2, widthPadding, 0, tex, reversed);
+    Vec3D p1 = Vec3DFromPVector(screenPoint1);
+    Vec3D p2 = Vec3DFromPVector(screenPoint2);
+    
+    float diff = p2.distanceTo(p1);
+    float scaleX = diff*(leftPadding+rightPadding);
+    float scaleY = diff*(topPadding+bottomPadding);
+    
+    //Vec3D meshScale = Vec3D(diff*(leftPadding+rightPadding), diff*(topPadding+bottomPadding), diff);
+    drawMeshBetween(p1, p2, scaleX, scaleY, origMesh, renderer);
+    
   }
+  
 
-
-  // no texture
-  void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, int lengthPadding)
+  public void drawMeshBetween(Vec3D p1, Vec3D p2, float scaleX, float scaleY, TriangleMesh mesh, PGraphics buffer)
   {
-    renderRectFromVectors(p1, p2, widthPadding, lengthPadding, null, false);
-  }
+    //place p1-p2 vector diff at origin
+    gfx.setGraphics(buffer);
 
-  // no reverse
-  void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, int lengthPadding, PImage tex)
-  {
-    renderRectFromVectors(p1, p2, widthPadding, lengthPadding, tex, false);
-  }
+    Vec3D meshDiff = p2.sub(p1);
+    float meshMag = meshDiff.magnitude();
+    Vec3D dir = meshDiff.getNormalized();
 
+    // scale properly
+    Vec3D meshScale = new Vec3D(scaleX, scaleY, meshMag/2);
 
-  //
-  // this draws a textured rectangle between two points with an absolute width and height in pixels,
-  // optionally reversed in x direction
-  //
+    // scale from point to point
+    mesh = mesh.getScaled(meshScale);
 
-  void renderRectFromVectors(PVector p1, PVector p2, int widthPadding, int lengthPadding, PImage tex, boolean reversed)
-  {
-    // rotate the screen the angle btw the two vectors and then draw it rightside-up
-    float angle = atan2(p2.y-p1.y, p2.x-p1.x);
-    float xdiff = p1.x-p2.x;
-    float ydiff = p1.y-p2.y;
+    // get current rotation
+    float[] axis=Quaternion.getAlignmentQuat(dir, Vec3D.Z_AXIS).toAxisAngle();
 
-    float w2 =  (p1.x - p2.x)*0.5f;
-    float h2 =  (p1.y - p2.y)*0.5f;
-    float xCenter = p1.x - w2;
-    float yCenter = p1.y - h2;
+    buffer.noStroke();
+    buffer.pushMatrix();
 
-    // height of the shape
-    float h = sqrt( xdiff*xdiff + ydiff*ydiff) + lengthPadding*2.0f;
+    // move to 1st points
+    gfx.translate(p1);
 
-    //renderer.ellipse(xCenter, yCenter, 10, 10);  
-
-    renderer.pushMatrix();
-
-    // rotations are at 0,0 by default, but we want to rotate around the center
-    // of this shape
-    renderer.translate(xCenter, yCenter);
-    //ellipse(0, 0, 20, 20);
-
-    // rotate
-    renderer.rotate(angle);
-
-    // center screen
-    renderer.translate( -h*0.5f, -widthPadding/2);
-
-    renderRect(h, widthPadding, p1.z, p2.z, tex, reversed);
-
-    renderer.popMatrix();
-
-    // another way to do it...  
-    // center screen
-    //  translate( -h*0.5f, widthPadding);
-    //
-    //  rotate(-HALF_PI);
-    //  tex.render(0,0,widthPadding*2.0f,h);
-    //  popMatrix();
+    // align the Z axis of the box with the direction vector  
+    rotate(axis[0], axis[1], axis[2], axis[3]);
 
 
-    // for debugging...
-    //  stroke(0);
-    //  strokeWeight(1.0);  
-    //  fill(0, 60);
-    //  ellipse(p1.x, p1.y, 10, 10);
-    //  ellipse(p2.x, p2.y, 10, 10);
+    // draw rotated coordinate system
+    gfx.origin(new Vec3D(), 100);
+    gfx.mesh(mesh, false, 10);
+    buffer.popMatrix();
   }
 
 
-  //
-  // this draws a textured rectangle between two points with an *relative* width and height in pixels   
-  //
 
-
-  void renderRectFromVectors(PVector p1, PVector p2, float padSidePercent)
-  {
-    renderRectFromVectors(p1, p2, padSidePercent, 0.0, null, false);
-  }
-
-  void renderRectFromVectors(PVector p1, PVector p2, float padSidePercent, boolean reversed)
-  {
-    renderRectFromVectors(p1, p2, padSidePercent, 0.0, null, reversed);
-  }
-
-  // simple, no texture
-  void renderRectFromVectors(PVector p1, PVector p2, float padSidePercent, PImage tex)
-  {
-    renderRectFromVectors(p1, p2, padSidePercent, 0, tex, false);
-  }
-
-  void renderRectFromVectors(PVector p1, PVector p2, float padSidePercent, PImage tex, boolean reversed)
-  {
-    renderRectFromVectors(p1, p2, padSidePercent, 0.0, tex, reversed);
-  }
-
-
-  void renderRectFromVectors(PVector p1, PVector p2, float padSidePercent, float padEndPercent)
-  {
-    renderRectFromVectors(p1, p2, padSidePercent, padEndPercent, null, false);
-  }
-
-
-  void renderRectFromVectors(PVector p1, PVector p2, float padW, float padH, PImage tex)
-  {
-    renderRectFromVectors( p1, p2, padW, padW, padH, padH, tex, false);
-  }
-
-
-  void renderRectFromVectors(PVector p1, PVector p2, float padW, float padH, PImage tex, boolean reversed)
-  {
-    renderRectFromVectors( p1, p2, padW, padW, padH, padH, tex, reversed);
-  }
-
-
-  void renderRectFromVectors(PVector p1, PVector p2, float padLeft, float padRight, float padTop, float padBottom, PImage tex)
-  {
-    renderRectFromVectors( p1, p2, padLeft, padRight, padTop, padBottom, tex, false);
-  }
 
   void renderRectFromVectors(PVector p1, PVector p2, float padLeft, float padRight, float padTop, float padBottom, PImage tex, boolean reversed)
   {
@@ -272,7 +235,7 @@ public class BasicBodyPartRenderer implements BodyPartRenderer
     // rotations are at 0,0 by default, but we want to rotate around the center
     // of this shape
 
-    //renderer.translate(xCenter, yCenter, (p1.z+p2.z)/2);
+    renderer.translate(xCenter, yCenter, (p1.z+p2.z)/2);
     //renderer.ellipse(0, 0, 20, 20);
 
     // rotate

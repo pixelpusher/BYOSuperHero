@@ -31,6 +31,9 @@ BodyPartRenderer bodyPartRenderer;
 // these are the actual renderers
 BodyPartRenderer bodyPart2DRenderer, bodyPartParticleRenderer;
 
+BoxRenderer boxRenderer;
+
+
 // this contains methods for creating new body parts and adding them to skeletons (to keep track of)
 BodyPartFactory bodyPartFactory;
 
@@ -70,6 +73,7 @@ void setup()
   gui.addSlider("particleMassAttractFactor", 0.1, 40, 5, 25, 100, 20);
   gui.addSlider("boneMinDist", 10*10, 200*200, 5, 45, 300, 20);
 
+
   println("set size");
 
   screenWidthToKinectWidthRatio = width/640.0f;
@@ -102,6 +106,10 @@ void setup()
   bodyPartParticleRenderer = new ParticleBodyPartRenderer(this.g);
 
   bodyPartRenderer = bodyPart2DRenderer= new BasicBodyPartRenderer(this.g);
+  boxRenderer = new BoxRenderer(this.g);
+  
+  boxRenderer.initRenderer(this);
+  bodyPartRenderer = (BodyPartRenderer)boxRenderer;
 }
 
 
@@ -151,6 +159,18 @@ void buildSkeleton(Skeleton s)
   bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND, BodyPart.RIGHT_ARM_LOWER)
     .setPadding(0.15, 0.15, 0.15, 0.0)
       .setTexture(armTex)
+        .setReversed(true);
+
+
+  //LEFT HAND
+  bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_LEFT_WRIST, SimpleOpenNI.SKEL_LEFT_HAND, BodyPart.LEFT_HAND)
+    .setPadding(0.15, 0.15, 0.15, 0.0)
+      .setTexture(null);
+
+  //RIGHT HAND
+  bodyPartFactory.createPartForSkeleton(s, SimpleOpenNI.SKEL_RIGHT_WRIST, SimpleOpenNI.SKEL_RIGHT_HAND, BodyPart.RIGHT_HAND)
+    .setPadding(0.15, 0.15, 0.15, 0.0)
+      .setTexture(null)
         .setReversed(true);
 
   //NECK

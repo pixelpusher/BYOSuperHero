@@ -19,19 +19,26 @@ public abstract class BodyPart
    PImage   getTexture(PImage _tex);
    */
 
-  static int HEAD = 0;
-  static int NECK = 1;
-  static int LEFT_ARM_UPPER = 2;
-  static int LEFT_ARM_LOWER = 3;
-  static int RIGHT_ARM_UPPER = 4;
-  static int RIGHT_ARM_LOWER = 5;
-  static int TORSO = 6;
-  static int LEFT_LEG_UPPER = 7;
-  static int LEFT_LEG_LOWER = 8;
-  static int RIGHT_LEG_UPPER = 9;
-  static int RIGHT_LEG_LOWER = 10;
-  static int PELVIS = 11;
+  static final int HEAD = 0;
+  static final int NECK = 1;
+  static final int LEFT_ARM_UPPER = 2;
+  static final int LEFT_ARM_LOWER = 3;
+  static final int RIGHT_ARM_UPPER = 4;
+  static final int RIGHT_ARM_LOWER = 5;
+  static final int TORSO = 6;
+  static final int LEFT_LEG_UPPER = 7;
+  static final int LEFT_LEG_LOWER = 8;
+  static final int RIGHT_LEG_UPPER = 9;
+  static final int RIGHT_LEG_LOWER = 10;
+  static final int PELVIS = 11;
+  static final int RIGHT_HAND = 12;
+  static final int LEFT_HAND = 13;
+  static final int OTHER = 14;
 
+
+  static final String[] NAMES = { "HEAD", "NECK", "LEFT_ARM_UPPER", "LEFT_ARM_LOWER", "RIGHT_ARM_UPPER",  "RIGHT_ARM_LOWER",
+    "TORSO", "LEFT_LEG_UPPER", "LEFT_LEG_LOWER", "RIGHT_LEG_UPPER", "RIGHT_LEG_LOWER", "PELVIS", "RIGHT_HAND", "LEFT_HAND", "OTHER" };
+  
   protected PImage tex;
   protected float padR, padL, padT, padB;
   public boolean reversed;
@@ -46,7 +53,7 @@ public abstract class BodyPart
 
   static public boolean checkTypeIsValid(int _type)
   {
-    if (_type >= BodyPart.HEAD && _type <= BodyPart.RIGHT_LEG_LOWER)
+    if (_type >= BodyPart.HEAD && _type <= BodyPart.OTHER)
       return true;
 
     return false;
@@ -73,8 +80,8 @@ public abstract class BodyPart
   float worldDepthToScreen(float z)
   {
     // base depth on the width of the context
-    //return context.depthImage().width * ((Math.abs(z) < 1E-5) ? 0f : 525.0f/z);
-    return (Math.abs(z) < 1E-5) ? 0f : 525.0f/z;
+    return context.depthImage().width * ((Math.abs(z) < 1E-5) ? 0f : 525.0f/z);
+    //return (Math.abs(z) < 1E-5) ? 0f : 525.0f/z;
   }
 
   public BodyPart setContext(SimpleOpenNI _context)
