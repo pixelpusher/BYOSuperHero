@@ -1,0 +1,25 @@
+<jointsData>
+	<jointsPositions>
+		<joint id="SKEL_HEAD" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_NECK" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_TORSO" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_WAIST" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_RIGHT_COLLAR" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_LEFT_COLLAR" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_RIGHT_SHOULDER" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_LEFT_SHOULDER" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_RIGHT_ELBOW" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_RIGHT_WRIST" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_LEFT_WRIST" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_RIGHT_HAND" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_LEFT_HAND" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_RIGHT_FINGERTIP" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_LEFT_FINGERTIP" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_RIGHT_HIP" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_LEFT_HIP" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_RIGHT_KNEE" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_RIGHT_ANKLE" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_RIGHT_FOOT" x="0.0" y="0.0" z="0.0" />
+		<joint id="SKEL_LEFT_FOOT" x="0.0" y="0.0" z="0.0" />
+	</jointsPositions>
+</jointsData>
