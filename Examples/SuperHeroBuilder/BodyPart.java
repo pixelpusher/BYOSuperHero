@@ -267,5 +267,12 @@ public abstract class BodyPart
       super(s);
     }
   }
+  
+  public abstract String toString();
+  
+  public static String vectorToString(PVector v)
+  {
+    return "(x,y,z=" + v.x +","+v.y +","+v.z +")";
+  }
 }
 

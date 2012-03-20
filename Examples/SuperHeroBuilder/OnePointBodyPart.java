@@ -92,5 +92,16 @@ public class OnePointBodyPart extends BodyPart
 
     return this;
   }
+  
+  public String toString()
+  {
+    String output = "bodyPart["+joint1ID+"]:\n";
+    
+    output += "screen pos: ";    
+    output += vectorToString( screenPoint1 );
+    output += "offset: ";
+    output += vectorToString( offsetPercent );
+    return output;
+  }
 }
 

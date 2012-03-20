@@ -181,5 +181,25 @@ public class FourPointBodyPart extends BodyPart
 
     return this;
   }
+
+  public String toString()
+  {
+    String output = "bodyPart:\n["+joint1ID+"]:";
+    output += "screen pos1: ";    
+    output += vectorToString( screenPoint1 );
+    output += "["+joint2ID+"]:";
+    output += "screen pos2: ";    
+    output += "["+joint3ID+"]:";
+    output += vectorToString( screenPoint2 );
+    output += "screen pos3: ";    
+    output += "["+joint4ID+"]:";
+    output += vectorToString( screenPoint3 );
+    output += "screen pos4: ";    
+    output += vectorToString( screenPoint4 );
+
+    output += "offset: ";
+    output += vectorToString( offsetPercent );
+    return output;
+  }
 }
 

@@ -106,6 +106,19 @@ public Skeleton update(List<Joint> joints)
     return this;
   }
   
+  
+  public String toString()
+  {
+    String output = "Skeleton["+id+"]:{";
+    
+    for (BodyPart bp : mBodyParts)
+    {
+       output += "\n" + bp.toString(); 
+    }
+    output += "}";
+    
+   return output;
   // end class Skeleton
+  }
 }
 

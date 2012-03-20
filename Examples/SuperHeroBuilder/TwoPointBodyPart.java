@@ -1,6 +1,7 @@
 import SimpleOpenNI.*;
 import processing.core.PImage;
 import processing.core.PVector;
+import java.util.List;
 
 
 public class TwoPointBodyPart extends BodyPart
@@ -123,6 +124,21 @@ public class TwoPointBodyPart extends BodyPart
     offsetCalculated.z = offsetPercent.z*(screenPoint1.z+screenPoint2.z)*0.5f;
 
     return this;
+  }
+
+  public String toString()
+  {
+    String output = "bodyPart:\n";
+    output += "screen pos1: ";    
+    output += vectorToString( screenPoint1 );
+    output += "["+joint1ID+"]:";
+    output += "screen pos2: ";    
+    output += "["+joint2ID+"]:";
+    output += vectorToString( screenPoint2 );
+
+    output += "offset: ";
+    output += vectorToString( offsetPercent );
+    return output;
   }
 }
 

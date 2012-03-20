@@ -81,7 +81,7 @@ void setupGui()
     bodyPartsList.addItem(BodyPart.NAMES[i], i);
   }
 
-/*
+
   for (Entry<Integer, String> entry : JOINT_NAMES.entrySet() )
   {
     for (int i=0; i<4; i++)
@@ -90,7 +90,7 @@ void setupGui()
       jointsList.addItem( entry.getValue(), entry.getKey().intValue());
     }
   }
-*/
+
 
 for (int i=0; i<joints.size(); i++)
 {
@@ -135,7 +135,7 @@ public void CreateBodyPart(int theValue)
     DropdownList jointsList = (DropdownList) (gui.getGroup("jointsList"+i));
 
     int jointType = (int)(jointsList.value());
-    if (jointType > -1) 
+    if (jointType > 0) 
     {
       jointTypes[numJoints] = jointType;
       numJoints++;

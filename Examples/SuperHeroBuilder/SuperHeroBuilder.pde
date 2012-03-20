@@ -103,8 +103,9 @@ void setup()
 
   XML jointsXML = new XML (reader);
 
-  XML jointNodes[] = jointsXML.getChildren("jointsData/jointsPositions");
+  XML jointNodes[] = jointsXML.getChildren("jointsPositions/joint");
 
+  
   println("XML: Found " + jointNodes.length + " joints nodes");
 
   //
@@ -225,7 +226,7 @@ void buildSkeleton(Skeleton s)
       .setTexture(legTex)
         .setReversed(true);
 
-  // set all new joint positions [properly based on ones we read in      
+  // set all new joint positions [properly based on ones we read in]      
   s.update( joints );
 }
 
@@ -301,8 +302,12 @@ void keyReleased()
     saveFrames = !saveFrames;
     break;
 
+  case 'i': // print some info
+  println( currentSkeleton.toString() );
+  
+  break;
   default: 
-    saveFrame("kinect"+year()+"-"+month()+"-"+day()+"_"+hour()+"."+minute()+"."+second()+".png");
+    //saveFrame("kinect"+year()+"-"+month()+"-"+day()+"_"+hour()+"."+minute()+"."+second()+".png");
     break;
   }
 }

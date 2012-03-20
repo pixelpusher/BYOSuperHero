@@ -1,8 +1,14 @@
 int jointStringToInt(String openNIString)
-{
-  Integer id = jointIDs.find(openNIString);
-
-  if (id) return id.intValue();
+{  
+  for ( Entry<Integer,String> entry : jointIDs.entrySet())
+  {
+    String NIString = entry.getValue();
+    if (NIString.equals(openNIString))
+    {
+      return entry.getKey().intValue();
+    }
+  }
+  // otherwise return false
   return -1;
 }
 
