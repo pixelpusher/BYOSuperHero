@@ -64,19 +64,31 @@ public class TwoPointBodyPart extends BodyPart
   public BodyPart update(List<Joint> joints)
   {
     // not very optimised!
-
+    //  System.out.println("updating joints:");
+      
     for (int i=0; i<joints.size(); i++)
-    {
+    { 
       Joint joint = joints.get(i);
       if (joint.id == joint1ID)
       {
+        screenPoint1.set(joint);
         pscreenPoint1.set(joint);
       }
       else if (joint.id == joint2ID)
       {
+        screenPoint2.set(joint);
         pscreenPoint2.set(joint);
       }
+
+//      System.out.println("j1/j:" + joint1ID + "/" + joint.id);
+//      System.out.println("j2/j:" + joint2ID + "/" + joint.id);
+//      System.out.println("x,y,z:" + joint.x + "," + joint.y + "," + joint.z);
     }
+        // now calculate offsets in screen coords
+    offsetCalculated.x = offsetPercent.x*(screenPoint1.x+screenPoint2.x)*0.5f;
+    offsetCalculated.y = offsetPercent.y*(screenPoint1.y+screenPoint2.y)*0.5f;
+    offsetCalculated.z = offsetPercent.z*(screenPoint1.z+screenPoint2.z)*0.5f;
+
     return this;
   }
 

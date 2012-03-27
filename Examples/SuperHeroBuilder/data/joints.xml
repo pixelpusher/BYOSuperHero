@@ -1,26 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jointsData>
-	<jointsPositions>
-		<joint id="SKEL_HEAD" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_NECK" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_TORSO" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_WAIST" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_RIGHT_COLLAR" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_LEFT_COLLAR" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_RIGHT_SHOULDER" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_LEFT_SHOULDER" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_RIGHT_ELBOW" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_RIGHT_WRIST" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_LEFT_WRIST" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_RIGHT_HAND" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_LEFT_HAND" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_RIGHT_FINGERTIP" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_LEFT_FINGERTIP" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_RIGHT_HIP" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_LEFT_HIP" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_RIGHT_KNEE" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_RIGHT_ANKLE" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_RIGHT_FOOT" x="0.0" y="0.0" z="0.0" />
-		<joint id="SKEL_LEFT_FOOT" x="0.0" y="0.0" z="0.0" />
-	</jointsPositions>
-</jointsData>
+<skeletonData updated="2012.3.27-14:23:56" version="1.0">
+  <skeleton id="1">
+    <joint id="SKEL_HEAD" x="306.60248" y="140.03174" z="148.00676"/>
+    <joint id="SKEL_NECK" x="306.54443" y="194.03268" z="149.81172"/>
+    <joint id="SKEL_TORSO" x="306.54968" y="248.59811" z="151.72879"/>
+    <joint id="SKEL_WAIST" x="NaN" y="NaN" z="0.0"/>
+    <joint id="SKEL_LEFT_COLLAR" x="NaN" y="NaN" z="0.0"/>
+    <joint id="SKEL_LEFT_SHOULDER" x="267.7377" y="194.11375" z="149.872"/>
+    <joint id="SKEL_LEFT_ELBOW" x="239.07936" y="272.57968" z="149.64857"/>
+    <joint id="SKEL_LEFT_WRIST" x="NaN" y="NaN" z="0.0"/>
+    <joint id="SKEL_LEFT_HAND" x="182.62677" y="325.59735" z="163.16586"/>
+    <joint id="SKEL_LEFT_FINGERTIP" x="NaN" y="NaN" z="0.0"/>
+    <joint id="SKEL_RIGHT_COLLAR" x="NaN" y="NaN" z="0.0"/>
+    <joint id="SKEL_RIGHT_SHOULDER" x="345.31995" y="193.95166" z="149.7515"/>
+    <joint id="SKEL_RIGHT_ELBOW" x="370.85434" y="270.09637" z="150.04381"/>
+    <joint id="SKEL_RIGHT_WRIST" x="NaN" y="NaN" z="0.0"/>
+    <joint id="SKEL_RIGHT_HAND" x="426.80493" y="322.01428" z="161.40332"/>
+    <joint id="SKEL_LEFT_HIP" x="280.60794" y="305.3429" z="153.37495"/>
+    <joint id="SKEL_RIGHT_FINGERTIP" x="NaN" y="NaN" z="0.0"/>
+    <joint id="SKEL_LEFT_ANKLE" x="NaN" y="NaN" z="0.0"/>
+    <joint id="SKEL_LEFT_KNEE" x="276.40375" y="423.4019" z="162.70279"/>
+    <joint id="SKEL_RIGHT_HIP" x="332.32385" y="304.74484" z="153.64867"/>
+    <joint id="SKEL_LEFT_FOOT" x="252.65395" y="525.1161" z="157.89648"/>
+    <joint id="SKEL_RIGHT_ANKLE" x="NaN" y="NaN" z="0.0"/>
+    <joint id="SKEL_RIGHT_KNEE" x="350.06284" y="420.15466" z="160.85358"/>
+    <joint id="SKEL_RIGHT_FOOT" x="367.55905" y="478.96802" z="161.67299"/>
+  </skeleton>
+</skeletonData>

@@ -5,6 +5,8 @@ ControlP5 gui;
 
 ControlWindow newBodyPartControlWindow;
 
+BodyPart currentBodyPart = null;
+
 
 
 void setupGui()
@@ -14,10 +16,12 @@ void setupGui()
   int guiY = 20;
   int guiX = 5;
 
-  gui.addSlider("offsetX", -1f, 1f, 0f, guiX, guiY, 200, 20);
+  gui.addSlider("offsetX", -1f, 1f, 0f, guiX, guiY, 200, 18);
   guiY += 24;
-  gui.addSlider("offsetY", -1f, 1f, 0f, guiX, guiY, 200, 20);
+  gui.addSlider("offsetY", -1f, 1f, 0f, guiX, guiY, 200, 18);
   guiY += 24;
+  gui.addSlider("offsetZ", -1f, 1f, 0f, guiX, guiY, 200, 18);
+  guiY += 28;
   gui.addSlider("paddingL", -1f, 1f, 0f, guiX, guiY, 200, 20);
   guiY += 24;
   gui.addSlider("paddingR", -1f, 1f, 0f, guiX, guiY, 200, 20);
@@ -92,15 +96,15 @@ void setupGui()
   }
 
 
-for (int i=0; i<joints.size(); i++)
-{
-  Joint joint = joints.get(i);
+  for (int i=0; i<joints.size(); i++)
+  {
+    Joint joint = joints.get(i);
     for (int ii=0; ii<4; ii++)
     {
       jointsList = (DropdownList) (gui.getGroup("jointsList"+ii));
       jointsList.addItem( joint.name, joint.id );
     }
-}  
+  }  
 
   guiY += 24;
   b.setPosition(guiX, guiY);  
@@ -152,7 +156,7 @@ public void CreateBodyPart(int theValue)
       {
         jointType = jointTypes[i++];
       }
-      bodyPartFactory.createPartForSkeleton(currentSkeleton, jointType, bodyPartType);
+      currentBodyPart = bodyPartFactory.createPartForSkeleton(currentSkeleton, jointType, bodyPartType).setPadding(0.15, 0.15, 0.05, 0.05);
     }
     break;
 
@@ -173,7 +177,7 @@ public void CreateBodyPart(int theValue)
         }
       }
 
-      bodyPartFactory.createPartForSkeleton(currentSkeleton, jointTypes2[0], jointTypes2[1], bodyPartType);
+      currentBodyPart = bodyPartFactory.createPartForSkeleton(currentSkeleton, jointTypes2[0], jointTypes2[1], bodyPartType).setPadding(0.15, 0.15, 0.05, 0.05);
     }
     break;
 
@@ -194,7 +198,7 @@ public void CreateBodyPart(int theValue)
         }
       }
 
-      bodyPartFactory.createPartForSkeleton(currentSkeleton, jointTypes2[0], jointTypes2[1], 
+      currentBodyPart = bodyPartFactory.createPartForSkeleton(currentSkeleton, jointTypes2[0], jointTypes2[1], 
       jointTypes2[1], jointTypes2[2], bodyPartType);
     }
     break;
@@ -203,7 +207,11 @@ public void CreateBodyPart(int theValue)
     // do nothing
     break;
   }
+
+  // update joint positions
+  currentSkeleton.update( joints);
 }
+
 
 
 void controlEvent(ControlEvent theEvent) {
@@ -227,4 +235,71 @@ void controlEvent(ControlEvent theEvent) {
   //    println(theEvent.getController().getValue()+" from "+theEvent.getController());
   //  }
 }
+
+
+
+
+void paddingL(float val)
+{
+  if (currentBodyPart != null)
+  {
+    float[] padding = currentBodyPart.getPadding();
+    currentBodyPart.setPadding(val, padding[1], padding[2], padding[3]);
+  }
+}
+
+void paddingR(float val)
+{
+  if (currentBodyPart != null)
+  {
+    float[] padding = currentBodyPart.getPadding();
+    currentBodyPart.setPadding(padding[0], val, padding[2], padding[3]);
+  }
+}
+
+void paddingTop(float val)
+{
+  if (currentBodyPart != null)
+  {
+    float[] padding = currentBodyPart.getPadding();
+    currentBodyPart.setPadding(padding[0], padding[1], val, padding[3]);
+  }
+}
+
+void paddingBot(float val)
+{
+  if (currentBodyPart != null)
+  {
+    float[] padding = currentBodyPart.getPadding();
+    currentBodyPart.setPadding(padding[0], padding[1], padding[2], val);
+  }
+}
+
+
+void offsetX(float val)
+{
+  if (currentBodyPart != null)
+  {
+    currentBodyPart.offsetPercent.x = val;
+    currentBodyPart.update(joints);
+  }
+}
+void offsetY(float val)
+{
+  if (currentBodyPart != null)
+  {
+    currentBodyPart.offsetPercent.y = val;
+    currentBodyPart.update(joints);
+  }
+}
+
+void offsetZ(float val)
+{
+  if (currentBodyPart != null)
+  {
+    currentBodyPart.offsetPercent.z = val;
+    currentBodyPart.update(joints);
+  }
+}
+
 

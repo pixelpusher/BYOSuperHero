@@ -52,9 +52,15 @@ public class OnePointBodyPart extends BodyPart
       if (joint.id == joint1ID)
       {
         pscreenPoint1.set(joint);
+        screenPoint1.set(joint);
       }
       break;
     }
+        // now calculate offsets in screen coords
+    offsetCalculated.x = offsetPercent.x*200f;
+    offsetCalculated.y = offsetPercent.y*200f;
+    offsetCalculated.z = offsetPercent.z*200f;
+
     return this;
   }
 

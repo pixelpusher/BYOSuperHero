@@ -94,21 +94,31 @@ public class FourPointBodyPart extends BodyPart
       Joint joint = joints.get(i);
       if (joint.id == joint1ID)
       {
+        screenPoint1.set(joint);
         pscreenPoint1.set(joint);
       }
       else if (joint.id == joint2ID)
       {
+        screenPoint2.set(joint);
         pscreenPoint2.set(joint);
       }
       else if (joint.id == joint3ID)
       {
+        screenPoint3.set(joint);
         pscreenPoint3.set(joint);
       }
       else if (joint.id == joint4ID)
       {
+        screenPoint4.set(joint);
         pscreenPoint4.set(joint);
       }
     }
+    
+        // now calculate offsets in screen coords
+    offsetCalculated.x = offsetPercent.x*(screenPoint1.x+screenPoint2.x)*0.5f;
+    offsetCalculated.y = offsetPercent.y*(screenPoint1.y+screenPoint2.y)*0.5f;
+    offsetCalculated.z = offsetPercent.z*(screenPoint1.z+screenPoint2.z)*0.5f;
+
     return this;
   }
 

@@ -71,7 +71,6 @@ void setup()
 // comment out if not needed
   setupGUI();
 
-
   screenWidthToKinectWidthRatio = width/640.0f;
   screenHeightToKinectHeightRatio = height/480.0f;
 
@@ -91,6 +90,10 @@ void setup()
 
   // enable skeleton generation for all joints
   context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);
+
+  // this is for XML saving only
+  setupJointNames();
+
 
   // create body part factory for creating new body parts
   bodyPartFactory = BodyPartFactory.getInstance();
@@ -265,7 +268,11 @@ void draw()
   }
   // end of drawing skeleton stuff
 
-  if (saveImage)  saveFrame("kinect"+year()+"-"+month()+"-"+day()+"_"+hour()+"."+minute()+"."+second()+".png");
+  if (saveImage)  
+  {
+    saveFrame("kinect"+year()+"-"+month()+"-"+day()+"_"+hour()+"."+minute()+"."+second()+".png");
+    writeXML("kinect"+year()+"-"+month()+"-"+day()+"_"+hour()+"."+minute()+"."+second()+".xml", createJointsXML() );
+  }
 }
 
 

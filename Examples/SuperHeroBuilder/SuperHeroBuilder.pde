@@ -8,7 +8,9 @@
 
 import processing.opengl.*;
 import SimpleOpenNI.*;
-
+// for file chooser:
+import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 
 // images for body parts:
 PImage bodyTex, headTex, armTex, toparmTex, toplegTex, legTex;
@@ -21,6 +23,8 @@ String legTexFile  = "FieryMarioLeftLeg.png";
 String toplegTexFile  = "topleg.png";
 
 final String jointsXMLFile = "joints.xml";
+
+PVector camOffset;  // controls the current camera
 
 // shortcut to the current skeleton we want to draw
 Skeleton currentSkeleton = null;
@@ -60,10 +64,10 @@ void setup()
 {
   size(640, 480, OPENGL); 
 
-  currentSkeleton = new Skeleton(context); // remember that context is null because we are not using the camera now...
-
   screenWidthToKinectWidthRatio = width/640.0f;
   screenHeightToKinectHeightRatio = height/480.0f;
+
+  camOffset = new PVector();
 
   // load some texture files
   bodyTex = loadImage(bodyTexFile);
@@ -85,50 +89,18 @@ void setup()
 
   bodyPartRenderer = bodyPart2DRenderer= new BasicBodyPartRenderer(this.g);
 
+  currentSkeleton = new Skeleton(context); // remember that context is null because we are not using the camera now...
+  currentSkeleton.calibrated = true; // force it to be calibrated...
+
   context = new SimpleOpenNI(this);
+
 
   // set up joint names-to-ids hashmaps
   setupJointNames();
 
-  BufferedReader reader = null;
+  readJointsXML("data/joints.xml");
 
-  reader = createReader(jointsXMLFile);
-
-  if (reader == null)
-  {
-    println("No xml file found:" + jointsXMLFile);
-    exit();
-  }
-  joints = new ArrayList<Joint>();
-
-  XML jointsXML = new XML (reader);
-
-  XML jointNodes[] = jointsXML.getChildren("jointsPositions/joint");
-
-  
-  println("XML: Found " + jointNodes.length + " joints nodes");
-
-  //
-  // HANDLE joints
-  //   
-  for (int i=0; i < jointNodes.length; ++i)
-  {
-    XML node = jointNodes[i];
-
-    String name = node.getString("id");
-    float x = node.getFloat("x");
-    float y = node.getFloat("y");
-    float z = node.getFloat("z");
-
-    int OpenNIID = jointStringToInt( name );
-    Joint joint = new Joint(name, OpenNIID);
-    joint.set(x, y, z);
-
-    joints.add( joint );      
-    println("Joint name:" + name);
-  }
-
-setupGui();
+  setupGui();
 }
 
 
@@ -242,9 +214,27 @@ void draw()
 
   boolean saveImage = false;
 
-  fill(255, 150);
+  // handle camera movements
+  if (keyPressed)
+  {
+    if (key == 'c')
+    {
+      camOffset.x += mouseX-pmouseX;
+      camOffset.y += mouseY-pmouseY;
+    }
+    else if (key == 'C')
+    {
+      camOffset.z += mouseY-pmouseY;
+    }
+  }
+  pushMatrix();
+  translate(camOffset.x, camOffset.y, camOffset.z);
+
+  fill(255, 200);
   stroke(0, 0, 0);
   strokeWeight(2);
+
+  rect(mouseX, mouseY, 20, 20);
 
   // draw only the current: ?
   //  if (currentSkeleton != null)
@@ -262,7 +252,7 @@ void draw()
 
   // these draw based on percentages (so they scale to the body parts)
   bodyPartRenderer.render( currentSkeleton );
-
+  popMatrix();
 
   // save frame image if necessary
   if (saveFrames && (millis()-lastSaveTime) > 2000)
@@ -303,12 +293,61 @@ void keyReleased()
     break;
 
   case 'i': // print some info
-  println( currentSkeleton.toString() );
-  
-  break;
+    println( currentSkeleton.toString() );
+    break;
+
+  case ' ': 
+    loadXMLFile();
+    break;
+
+  case 'b': 
+    buildSkeleton( currentSkeleton );
+    break;
+
   default: 
     //saveFrame("kinect"+year()+"-"+month()+"-"+day()+"_"+hour()+"."+minute()+"."+second()+".png");
     break;
+  }
+}
+
+
+// for file open dialog  - hack because built in is broken in GLGraphics and OpenGL in Processing
+String openFileName = null;
+
+
+void loadXMLFile() {
+  try {
+    SwingUtilities. invokeLater(new Runnable() {
+      public void run() {
+
+        JFileChooser fileChooser = new JFileChooser();
+
+        XMLFilter xmlfilter = new XMLFilter();
+        fileChooser.setFileFilter(xmlfilter);
+        fileChooser.setCurrentDirectory(new File(sketchPath("") ) );
+        int return_val = fileChooser.showOpenDialog(null);
+        if ( return_val == JFileChooser.CANCEL_OPTION )   System.out.println("canceled");
+        if ( return_val == JFileChooser.ERROR_OPTION )    System.out.println("error");
+        if ( return_val == JFileChooser.APPROVE_OPTION )  
+        {
+          System.out.println("approved");
+
+          File file = fileChooser.getSelectedFile();
+          openFileName = file.getAbsolutePath();
+        } 
+        else {
+          openFileName = "none";
+        }
+        if (openFileName != "none") 
+        {
+          readJointsXML(openFileName);
+        }
+      }
+    }
+    );
+  } 
+  catch (Exception e) {
+    e.printStackTrace();
   }
 }
 
