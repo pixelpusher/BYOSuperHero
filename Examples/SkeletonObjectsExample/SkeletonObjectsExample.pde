@@ -8,7 +8,7 @@
 
 import processing.opengl.*;
 import SimpleOpenNI.*;
-import controlP5.*;
+
 
 // images for body parts:
 PImage bodyTex, headTex, armTex, toparmTex, toplegTex, legTex;
@@ -54,7 +54,7 @@ int lastSaveTime = 0;
 boolean drawDepthImage = true;
 boolean saveFrames = false;
 
-ControlP5 gui;
+
 
 
 ///////////////////////////////////////////
@@ -67,14 +67,10 @@ void setup()
 
   size(640, 480, OPENGL);  
 
-  gui = new ControlP5(this);
+// controlP5 gui utilities
+// comment out if not needed
+  setupGUI();
 
-  gui.addSlider("boneDistFactor", 0.001, 1, 5, 5, 100, 20);
-  gui.addSlider("particleMassAttractFactor", 0.1, 40, 5, 25, 100, 20);
-  gui.addSlider("boneMinDist", 10*10, 200*200, 5, 45, 300, 20);
-
-
-  println("set size");
 
   screenWidthToKinectWidthRatio = width/640.0f;
   screenHeightToKinectHeightRatio = height/480.0f;
