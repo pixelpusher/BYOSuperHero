@@ -25,8 +25,13 @@ public class BoxRenderer implements BodyPartRenderer
     app = _app;
     gfx=new ToxiclibsSupport(app);
     mSkeleton = null;
-    origMesh =(TriangleMesh)new AABB(new Vec3D(), 1).toMesh();
-    origMesh.transform(new Matrix4x4().translateSelf(0, 0, 1));
+    //origMesh =(TriangleMesh)new AABB(new Vec3D(), 1).toMesh();
+    
+    // load a mesh from a 3D STL file
+    STLReader reader = new STLReader(); 
+    origMesh = (TriangleMesh) reader.loadBinary(dataPath("head.stl"), TriangleMesh.class);
+    //origMesh.transform(new Matrix4x4().translateSelf(0, 0, 1));
+    origMesh.scale(0.05);
   }
 
   public BoxRenderer(PGraphics g)
@@ -107,8 +112,8 @@ public class BoxRenderer implements BodyPartRenderer
 
       // scale from point to point
       mesh = origMesh.getScaled(new Vec3D(w, h, h));
-
       gfx.translate(p1);
+      gfx.rotate(millis()*0.01f);
 
       if (tex != null)
       {
@@ -116,6 +121,7 @@ public class BoxRenderer implements BodyPartRenderer
       }
       else
       {
+
         gfx.mesh(mesh, false, 10);
       }
       if (obp.depthDisabled)

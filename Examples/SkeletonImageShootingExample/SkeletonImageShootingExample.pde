@@ -59,13 +59,13 @@ void setup()
 {
   size(640, 480, GLConstants.GLGRAPHICS);  
 
-// this next bit of code disables "screen tearing"
+  // this next bit of code disables "screen tearing"
   GL gl;
   PGraphicsOpenGL pgl = (PGraphicsOpenGL) g;
   gl = pgl.beginGL();  // always use the GL object returned by beginGL
   gl.setSwapInterval( 1 ); // use value 0 to disable v-sync 
   pgl.endGL();
-  
+
 
 
   // create fireball particle "swarm"
@@ -100,9 +100,9 @@ void setup()
 
 void draw()
 {
-  
+
   background(0);
-  
+
   // update the Kinect cam
   context.update();
 
@@ -122,23 +122,28 @@ void draw()
     {
       // update skeleton joints coordinates
       skel.update(context);
-      
+
+
+
       // Check if hand is straight out from elbow (parallel to floor).
       // First get direction of hand relative to elbow
       PVector handElbowDir = PVector.sub(skel.rightHandPos, skel.rightElbowPos);
-      
+
+      //float angle = atan2(skel.rightHandPos.y-skel.rightElbowPos.y, 
+      //  skel.rightHandPos.x-skel.rightElbowPos.x);
+
       float yangle = atan2(handElbowDir.y, handElbowDir.x);
-      
+
       // normalize to between 0 and 1
       handElbowDir.normalize();
-      
+
       if ( abs(handElbowDir.y) < handElbowDiffThresh )
       {
         // hand is pretty much horizontal - shoot some fireballs!
         newSwarm( fireballTex, skel.rightHandPos, handElbowDir );
       }
-      
-      
+
+
       // these draw based on pixels
       renderRectFromVectors(skel.leftShoulderPos, skel.rightShoulderPos, skel.rightHipPos, skel.leftHipPos, 5, 10, bodyTex);
 
@@ -149,26 +154,23 @@ void draw()
 
       renderRectFromVectors(skel.leftHipPos, skel.leftFootPos, 30, legTex);      
       renderRectFromVectors(skel.rightHipPos, skel.rightFootPos, 30, legTex, 1);
-      
-      fill(255,255,0);
-      ellipse(skel.rightElbowPos.x, skel.rightElbowPos.y, skel.rightElbowPos.z*80,skel.rightElbowPos.z*80);
-      fill(255,0,255);
-      ellipse(skel.rightHandPos.x, skel.rightHandPos.y, skel.rightHandPos.z*80,skel.rightHandPos.z*80);
-      
-      
+
+      fill(255, 255, 0);
+      ellipse(skel.rightElbowPos.x, skel.rightElbowPos.y, skel.rightElbowPos.z*80, skel.rightElbowPos.z*80);
+      fill(255, 0, 255);
+      ellipse(skel.rightHandPos.x, skel.rightHandPos.y, skel.rightHandPos.z*80, skel.rightHandPos.z*80);
+
+
       // DEBUGGING
       fill(255);
       textSize(24);
       text("y diff / angle = " + handElbowDir.y + " / " + degrees(yangle), 10, 25*skel.id);
-      
-      
     }
     // end of drawing skeleton stuff
   }
-  
-  
+
+
   drawSwarms();
-  
 }
 
 
@@ -221,53 +223,60 @@ void keyReleased()
 }
 
 
+int lastShootTime = 0;      // last time we shot a fireball
+int fireBallInterval = 300; // in milliseconds
 
 void newSwarm(GLTexture tex, PVector startPos, PVector direction)
 {
-  // number of fireballs in this swarm
-  int numFireballs = int( random(2, 6) );
-
-  // a bit of randomness to their position
-  float w = width/60.0f;
-  float h = height/60.0f;
-
-  ArrayList<PVector> fireballCoords = new ArrayList<PVector>();
-
-  // add some coordinates for our fireballs
-  for (int i=0; i < numFireballs; i++)
+  int timeDiff = millis()-lastShootTime;
+  if (timeDiff > fireBallInterval)
   {
-    fireballCoords.add( new PVector( startPos.x + random(-w, w), startPos.y + random(-h, h), startPos.z ) );
-  }
+    lastShootTime = millis();
 
-  ImageParticleSwarm swarm = new ImageParticleSwarm(this, tex);
+    // number of fireballs in this swarm
+    int numFireballs = int( random(2, 6) );
 
-  if (swarm.makeModel( fireballCoords ))
-  {
-    swarms.add( swarm );
+    // a bit of randomness to their position
+    float w = width/60.0f;
+    float h = height/60.0f;
 
-    // now create object to move this swarm of fireballs
-    ParticleMover particleBehaviour = new ParticleMover( fireballCoords.size() );
+    ArrayList<PVector> fireballCoords = new ArrayList<PVector>();
 
-    float vel = random(10, 40);
+    // add some coordinates for our fireballs
+    for (int i=0; i < numFireballs; i++)
+    {
+      fireballCoords.add( new PVector( startPos.x + random(-w, w), startPos.y + random(-h, h), startPos.z ) );
+    }
 
-    particleBehaviour.noisiness = 0.3;
+    ImageParticleSwarm swarm = new ImageParticleSwarm(this, tex);
 
-    particleBehaviour.setVelocities( PVector.mult(direction, vel ) );      
+    if (swarm.makeModel( fireballCoords ))
+    {
+      swarms.add( swarm );
 
-    particleMovers.add( particleBehaviour );
-    
-    // DEBUG:
-    //println("*****ADDED NEW SWARM****");
-    
-  }
+      // now create object to move this swarm of fireballs
+      ParticleMover particleBehaviour = new ParticleMover( fireballCoords.size() );
+
+      float vel = random(10, 40);
+
+      particleBehaviour.noisiness = 0.3;
+
+      particleBehaviour.setVelocities( PVector.mult(direction, vel ) );      
+
+      particleMovers.add( particleBehaviour );
+
+      // DEBUG:
+      //println("*****ADDED NEW SWARM****");
+    }
 
 
-  if (swarms.size() > MAX_SWARMS)
-  {
-    ImageParticleSwarm first = swarms.removeFirst();
-    first.destroy();
+    if (swarms.size() > MAX_SWARMS)
+    {
+      ImageParticleSwarm first = swarms.removeFirst();
+      first.destroy();
 
-    particleMovers.removeFirst();
+      particleMovers.removeFirst();
+    }
   }
 }
 
@@ -295,5 +304,4 @@ void drawSwarms()
   renderer.setDepthMask(true);
   renderer.endGL();
 }
-
 
