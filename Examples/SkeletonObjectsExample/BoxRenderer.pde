@@ -14,6 +14,7 @@ public class BoxRenderer implements BodyPartRenderer
   private PGraphics renderer;
   private Skeleton mSkeleton;
   private PApplet app;
+  private float rendererScaleW, rendererScaleH;
 
   public ToxiclibsSupport gfx;
 
@@ -30,12 +31,22 @@ public class BoxRenderer implements BodyPartRenderer
 
   public BoxRenderer(PGraphics g)
   {
-    renderer = g;
+    setRenderer(g);
   }
 
   public void setRenderer(PGraphics g)
   {
     renderer = g;
+    if (app != null)
+    {
+      rendererScaleW = renderer.width/((float)app.width);
+      rendererScaleH = renderer.height/((float)app.height);
+    }
+    else
+    {
+      rendererScaleW = 1f;
+      rendererScaleH = 1f;
+    }
   }
 
   public void setSkeleton(Skeleton s)
@@ -70,8 +81,11 @@ public class BoxRenderer implements BodyPartRenderer
   void render(BodyPart bodyPart)
   {
     renderer.pushMatrix();
-    renderer.translate(bodyPart.getScreenOffsetX(), bodyPart.getScreenOffsetY(), bodyPart.getScreenOffsetZ());
+    //    renderer.translate(-renderer.width/2, -renderer.height/2, 0);
+    //    renderer.scale(2,2,1);
 
+
+    renderer.translate(bodyPart.getScreenOffsetX(), bodyPart.getScreenOffsetY(), bodyPart.getScreenOffsetZ());
 
     if (bodyPart instanceof OnePointBodyPart)
     {
@@ -88,26 +102,22 @@ public class BoxRenderer implements BodyPartRenderer
         hint(DISABLE_DEPTH_TEST);
       }
 
-
-      // scale properly
-      Vec3D meshScale = new Vec3D(10, 10, 10);
-
-      float w = renderer.width*(obp.getLeftPadding()+obp.getRightPadding());
-      float h = renderer.height*(obp.getTopPadding()+obp.getBottomPadding());
+      float w = 0.1f*renderer.width*(obp.getLeftPadding()+obp.getRightPadding());
+      float h = 0.1f*renderer.height*(obp.getTopPadding()+obp.getBottomPadding());
 
       // scale from point to point
       mesh = origMesh.getScaled(new Vec3D(w, h, h));
 
       gfx.translate(p1);
-      gfx.mesh(mesh, false, 10);
 
-
-      //      if (tex != null)
-      //      {
-      //      }
-      //      else
-      //      {
-      //      }
+      if (tex != null)
+      {
+        gfx.texturedMesh(mesh, tex, false);
+      }
+      else
+      {
+        gfx.mesh(mesh, false, 10);
+      }
       if (obp.depthDisabled)
       {
         hint(ENABLE_DEPTH_TEST);
@@ -118,6 +128,7 @@ public class BoxRenderer implements BodyPartRenderer
     else if (bodyPart instanceof TwoPointBodyPart)
     {      
       TwoPointBodyPart tbp = (TwoPointBodyPart)bodyPart;
+
       renderMeshFromVectors(tbp.screenPoint1, tbp.screenPoint2, tbp.getLeftPadding(), tbp.getRightPadding(), 
       tbp.getTopPadding(), tbp.getBottomPadding(), tbp.getTexture(), tbp.getReversed() );
     }
@@ -142,35 +153,33 @@ public class BoxRenderer implements BodyPartRenderer
 
 
   void  renderMeshFromVectors(PVector screenPoint1, PVector screenPoint2, float leftPadding, float rightPadding, 
-    float topPadding, float bottomPadding, PImage tex, boolean reversed)
+  float topPadding, float bottomPadding, PImage tex, boolean reversed)
   {
     Vec3D p1 = Vec3DFromPVector(screenPoint1);
     Vec3D p2 = Vec3DFromPVector(screenPoint2);
-    
+
     float diff = p2.distanceTo(p1)/2;
     float scaleX = diff*(leftPadding+rightPadding);
     float scaleY = diff*(topPadding+bottomPadding);
-    
+
     //Vec3D meshScale = Vec3D(diff*(leftPadding+rightPadding), diff*(topPadding+bottomPadding), diff);
     drawMeshBetween(p1, p2, scaleX, scaleY, origMesh, renderer);
-    
   }
 
-void  renderMeshFromVectors(PVector screenPoint1, PVector screenPoint2, PVector screenPoint3, PVector screenPoint4, float leftPadding, float rightPadding, 
-    float topPadding, float bottomPadding, PImage tex, boolean reversed)
+  void  renderMeshFromVectors(PVector screenPoint1, PVector screenPoint2, PVector screenPoint3, PVector screenPoint4, float leftPadding, float rightPadding, 
+  float topPadding, float bottomPadding, PImage tex, boolean reversed)
   {
     Vec3D p1 = Vec3DFromPVector(screenPoint1);
     Vec3D p2 = Vec3DFromPVector(screenPoint2);
-    
+
     float diff = p2.distanceTo(p1);
     float scaleX = diff*(leftPadding+rightPadding);
     float scaleY = diff*(topPadding+bottomPadding);
-    
+
     //Vec3D meshScale = Vec3D(diff*(leftPadding+rightPadding), diff*(topPadding+bottomPadding), diff);
     drawMeshBetween(p1, p2, scaleX, scaleY, origMesh, renderer);
-    
   }
-  
+
 
   public void drawMeshBetween(Vec3D p1, Vec3D p2, float scaleX, float scaleY, TriangleMesh mesh, PGraphics buffer)
   {
@@ -197,7 +206,7 @@ void  renderMeshFromVectors(PVector screenPoint1, PVector screenPoint2, PVector 
     gfx.translate(p1);
 
     // align the Z axis of the box with the direction vector  
-    rotate(axis[0], axis[1], axis[2], axis[3]);
+    buffer.rotate(axis[0], axis[1], axis[2], axis[3]);
 
 
     // draw rotated coordinate system
